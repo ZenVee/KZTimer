@@ -102,6 +102,12 @@ public Action:MainTimer2(Handle:timer)
 	return Plugin_Continue;
 }
 
+public Action:ResetSlowdownTimer(Handle:timer, any:client)
+{
+	g_bSlowDownCheck[client]=false;	
+}
+
+
 public Action:TriggerFPSCheck(Handle:timer)
 {
 	if (g_bfpsCheck)
@@ -136,6 +142,17 @@ public Action:OnDeathTimer(Handle:Timer, any:client)
 		}
 	}
 }
+
+public Action:KickPlayer(Handle:Timer, any:client)
+{
+	if (IsClientInGame(client) && !IsFakeClient(client))
+	{
+		decl String:szReason[64];
+		Format(szReason, 64, "FPS-Check failed.");
+		KickClient(client, "%s", szReason);
+	}
+}
+
 
 //challenge start countdown
 public Action:Timer_Countdown(Handle:timer, any:client)

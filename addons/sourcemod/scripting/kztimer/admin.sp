@@ -160,6 +160,11 @@ public KzAdminMenu(client)
 	else
 		Format(szTmp, sizeof(szTmp), "[27.] AutoBhop  -  Disabled"); 				
 	AddMenuItem(adminmenu, szTmp, szTmp);
+	if (g_bForceJumpPenalty)
+		Format(szTmp, sizeof(szTmp), "[28.] Force jump penalty -  Enabled"); 	
+	else
+		Format(szTmp, sizeof(szTmp), "[28.] Force jump penalty  -  Disabled"); 				
+	AddMenuItem(adminmenu, szTmp, szTmp);
 	SetMenuExitButton(adminmenu, true);
 	SetMenuOptionFlags(adminmenu, MENUFLAG_BUTTON_EXIT);	
 	if (g_AdminMenuLastPage[client] < 6)
@@ -370,6 +375,13 @@ public AdminPanelHandler(Handle:menu, MenuAction:action, param1, param2)
 			else
 				ServerCommand("kz_auto_bhop 0");
 		}			
+		if(param2 == 27)
+		{
+			if (!g_bForceJumpPenalty)
+				ServerCommand("kz_force_jump_penalty 1");
+			else
+				ServerCommand("kz_force_jump_penalty 0");
+		}				
 		g_AdminMenuLastPage[param1]=param2;
 		if (menu != INVALID_HANDLE)
 			CloseHandle(menu);

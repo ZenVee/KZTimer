@@ -11,7 +11,7 @@
 #include <geoip>
 #include <colors>
 #undef REQUIRE_EXTENSIONS
-#define VERSION "1.11"
+#define VERSION "1.11 Nightly #2"
 #define ADMIN_LEVEL ADMFLAG_UNBAN
 #define WHITE 0x01
 #define DARKRED 0x02
@@ -188,6 +188,8 @@ new Handle:g_hPlayerSkinChange = INVALID_HANDLE;
 new bool:g_bPlayerSkinChange;
 new Handle:g_hJumpStats = INVALID_HANDLE;
 new bool:g_bJumpStats;
+new Handle:g_hForceJumpPenalty = INVALID_HANDLE;
+new bool:g_bForceJumpPenalty;
 new Handle:g_hCountry = INVALID_HANDLE;
 new bool:g_bCountry;
 new Handle:g_hAutoRespawn = INVALID_HANDLE;
@@ -301,6 +303,7 @@ new bool:g_bBhopHackProtection;
 new bool:g_bDuckInAir[MAXPLAYERS+1];
 new bool:g_bLastButtonJump[MAXPLAYERS+1];
 new bool:g_bPlayerJumped[MAXPLAYERS+1];
+new bool:g_bOnGround[MAXPLAYERS+1];
 new bool:g_bCheckSurf[MAXPLAYERS+1];
 new bool:g_bSpectate[MAXPLAYERS+1];
 new bool:g_bTimeractivated[MAXPLAYERS+1];
@@ -312,7 +315,6 @@ new bool:g_bClimbersMenuOpen2[MAXPLAYERS+1];
 new bool:g_bNoClip[MAXPLAYERS+1]; 
 new bool:g_bMapFinished[MAXPLAYERS+1]; 
 new bool:g_bRespawnPosition[MAXPLAYERS+1]; 
-new bool:g_bSlowDownCheck[MAXPLAYERS+1]; 
 new bool:g_bManualRecalc; 
 new bool:g_bSelectProfile[MAXPLAYERS+1]; 
 new bool:g_bClimbersMenuwasOpen[MAXPLAYERS+1]; 
@@ -326,6 +328,7 @@ new bool:g_bChallengeRequest[MAXPLAYERS+1];
 new bool:g_strafing_aw[MAXPLAYERS+1];
 new bool:g_strafing_sd[MAXPLAYERS+1];
 new bool:g_pr_showmsg[MAXPLAYERS+1];
+new bool:g_bSlowDownCheck[MAXPLAYERS+1];
 new bool:g_CMOpen[MAXPLAYERS+1];
 new bool:g_bTouchWall[MAXPLAYERS+1];
 new bool:g_brc_PlayerRank[MAXPLAYERS+1];
@@ -344,7 +347,7 @@ new bool:g_bShowSpecs[MAXPLAYERS+1]=true;
 new bool:g_bCPTextMessage[MAXPLAYERS+1]=false; 
 new bool:g_bAdvancedClimbersMenu[MAXPLAYERS+1]=false;
 new bool:g_bAutoBhopClient[MAXPLAYERS+1]=true;
-
+new bool:g_bJumpPenalty[MAXPLAYERS+1]=false;
 //org
 new bool:g_borg_ColorChat[MAXPLAYERS+1];
 new bool:g_borg_InfoPanel[MAXPLAYERS+1];
@@ -359,6 +362,7 @@ new bool:g_borg_ShowSpecs[MAXPLAYERS+1];
 new bool:g_borg_CPTextMessage[MAXPLAYERS+1]; 
 new bool:g_borg_AdvancedClimbersMenu[MAXPLAYERS+1];
 new bool:g_borg_AutoBhopClient[MAXPLAYERS+1];
+new bool:g_borg_JumpPenalty[MAXPLAYERS+1];
 new g_bManualRecalcClientID=-1; 
 new g_unique_FileSize;
 new g_maptimes_pro;
@@ -533,6 +537,10 @@ public OnPluginStart()
 	g_bPreStrafe     = GetConVarBool(g_hPreStrafe);
 	HookConVarChange(g_hPreStrafe, OnSettingChanged);	
 
+	g_hForceJumpPenalty = CreateConVar("kz_force_jump_penalty", "0", "on/off - Force jump penalty for players (iceskating fix)", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_bForceJumpPenalty     = GetConVarBool(g_hForceJumpPenalty);
+	HookConVarChange(g_hForceJumpPenalty, OnSettingChanged);	
+	
 	g_hNoClipS = CreateConVar("kz_noclip", "1", "on/off - Allow players to use noclip when they have finished the map", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	g_bNoClipS     = GetConVarBool(g_hNoClipS);
 	HookConVarChange(g_hNoClipS, OnSettingChanged);	
@@ -750,6 +758,7 @@ public OnPluginStart()
 	
 	//client commands
 	RegConsoleCmd("sm_accept", Client_Accept);
+	RegConsoleCmd("sm_jumppenalty", Client_jumppenalty);
 	RegConsoleCmd("sm_goto", Client_GoTo);
 	RegConsoleCmd("sm_disablegoto", Client_DisableGoTo);
 	RegConsoleCmd("sm_showkeys", Client_InfoPanel);
@@ -950,7 +959,7 @@ public OnMapStart()
 	CreateTimer(2.0, RespawnTimer, _, TIMER_FLAG_NO_MAPCHANGE|TIMER_REPEAT);
 	CreateTimer(2.0, SettingsEnforcerTimer, _, TIMER_FLAG_NO_MAPCHANGE|TIMER_REPEAT);
 	CreateTimer(20.0, SecretTimer, _, TIMER_FLAG_NO_MAPCHANGE|TIMER_REPEAT);
-	CreateTimer(10.0, TriggerFPSCheck, _, TIMER_FLAG_NO_MAPCHANGE|TIMER_REPEAT);
+	CreateTimer(30.0, TriggerFPSCheck, _, TIMER_FLAG_NO_MAPCHANGE|TIMER_REPEAT);
 	CreateTimer(2.0, SpawnButtons, INVALID_HANDLE, TIMER_FLAG_NO_MAPCHANGE);	
 	new String:tmp[64];
 	
@@ -1151,6 +1160,7 @@ public OnClientPostAdminCheck(client)
 	g_bColorChat[client]=true; 
 	g_bShowSpecs[client]=true;
 	g_bAutoBhopClient[client]=true;
+	g_bJumpPenalty[client]=false;
 	decl String:szSteamId[32];
 	GetClientAuthString(client, szSteamId, 32);	
  	db_viewPersonalRecords(client,szSteamId,g_szMapName);	
@@ -1168,12 +1178,7 @@ public OnClientPostAdminCheck(client)
 		PlayerPanel(client);
 	}
 	else
-		g_bTimeractivated[client] = false;
-				
-	//fps Check
-	if (g_bfpsCheck)
-		QueryClientConVar(client, "fps_max", ConVarQueryFinished:FPSCheck, client);		
-		
+		g_bTimeractivated[client] = false;	
 			
 	//console ouput
 	decl String:NextMap[64];
@@ -1202,7 +1207,7 @@ public OnClientPostAdminCheck(client)
 	PrintToConsole(client, "!help, !menu, !options, !checkpoint, !gocheck, !prev, !next, !undo, !profile, !compare");
 	PrintToConsole(client, "!top, !start, !stop, , !pause, !usp, !challenge, !surrender, !goto, !spec, !showsettings");
 	PrintToConsole(client, "(options menu contains: !adv, !info, !colorchat, !cpmessage, !sound, !menusound");
-	PrintToConsole(client, "!hide, !hidespecs, !showtime, !disablegoto, !shownames, !sync, !bhop)");
+	PrintToConsole(client, "!hide, !hidespecs, !showtime, !disablegoto, !shownames, !sync, !bhop, !ice)");
 	PrintToConsole(client, " ");
 	PrintToConsole(client, "Live scoreboard");
 	PrintToConsole(client, "Kills: Time in seconds");
@@ -1277,7 +1282,7 @@ public OnClientDisconnect(client)
 			db_deleteTmp(client, szSteamId, g_szMapName); //delete tmp record (just to keep the db clear)
 
 	//DB: Save player options if changed
-	if (g_borg_AutoBhopClient[client] != g_bAutoBhopClient[client] || g_borg_ColorChat[client] != g_bColorChat[client] || g_borg_InfoPanel[client] != g_bInfoPanel[client] || g_borg_ClimbersMenuSounds[client] != g_bClimbersMenuSounds[client] ||  g_borg_EnableQuakeSounds[client] != g_bEnableQuakeSounds[client] || g_borg_ShowNames[client] != g_bShowNames[client] || g_borg_StrafeSync[client] != g_bStrafeSync[client] || g_borg_GoToClient[client] != g_bGoToClient[client] || g_borg_ShowTime[client] != g_bShowTime[client] || g_borg_Hide[client] != g_bHide[client] || g_borg_ShowSpecs[client] != g_bShowSpecs[client] || g_borg_CPTextMessage[client] != g_bCPTextMessage[client] || g_borg_AdvancedClimbersMenu[client] != g_bAdvancedClimbersMenu[client])
+	if (g_borg_JumpPenalty[client] != g_bJumpPenalty[client] || g_borg_AutoBhopClient[client] != g_bAutoBhopClient[client] || g_borg_ColorChat[client] != g_bColorChat[client] || g_borg_InfoPanel[client] != g_bInfoPanel[client] || g_borg_ClimbersMenuSounds[client] != g_bClimbersMenuSounds[client] ||  g_borg_EnableQuakeSounds[client] != g_bEnableQuakeSounds[client] || g_borg_ShowNames[client] != g_bShowNames[client] || g_borg_StrafeSync[client] != g_bStrafeSync[client] || g_borg_GoToClient[client] != g_bGoToClient[client] || g_borg_ShowTime[client] != g_bShowTime[client] || g_borg_Hide[client] != g_bHide[client] || g_borg_ShowSpecs[client] != g_bShowSpecs[client] || g_borg_CPTextMessage[client] != g_bCPTextMessage[client] || g_borg_AdvancedClimbersMenu[client] != g_bAdvancedClimbersMenu[client])
 		db_updatePlayerOptions(client, szSteamId);
 		
 	//DB: Delete invalid playertimes for this map (just to keep the db clear)
@@ -1415,6 +1420,19 @@ public OnSettingChanged(Handle:convar, const String:oldValue[], const String:new
 			g_bPointSystem = false;
 		}
 	}	
+	if(convar == g_hForceJumpPenalty)
+	{
+		if(newValue[0] == '1')
+		{
+			g_bForceJumpPenalty = true;		
+			for (new i = 1; i <= MaxClients; i++)
+				if (1 <= i <= MaxClients && IsClientInGame(i))				
+					g_bJumpPenalty[i] = true;				
+		}
+		else
+			g_bForceJumpPenalty = false;
+	}		
+	
 	if(convar == g_hcvarNoBlock)
 	{
 		if(newValue[0] == '1')

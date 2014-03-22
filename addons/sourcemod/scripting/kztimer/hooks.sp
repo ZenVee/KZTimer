@@ -8,6 +8,7 @@ public Action:Event_OnPlayerSpawn(Handle:event, const String:name[], bool:dontBr
 		g_fStartCommandUsed_LastTime[client] = GetEngineTime();
 		g_bPlayerJumped[client] = false;
 		g_SpecTarget[client] = -1;	
+		g_bOnGround[client] = true;
 		
 		//remove weapons
 		if (g_bCleanWeapons)
@@ -39,6 +40,9 @@ public Action:Event_OnPlayerSpawn(Handle:event, const String:name[], bool:dontBr
 			CS_SetClientClanTag(client, "LOCALHOST"); 
 			return;
 		}
+		//fps Check
+		if (g_bfpsCheck)
+			QueryClientConVar(client, "fps_max", ConVarQueryFinished:FPSCheck, client);		
 		
 		//player skin
 		if (g_bPlayerSkinChange)
@@ -51,7 +55,7 @@ public Action:Event_OnPlayerSpawn(Handle:event, const String:name[], bool:dontBr
 		if (g_bFirstSpawn[client])		
 		{
 			StartRecording(client);
-			CreateTimer(0.5, OnPlayerConnectTimer, client,TIMER_FLAG_NO_MAPCHANGE);
+			CreateTimer(0.25, OnPlayerConnectTimer, client,TIMER_FLAG_NO_MAPCHANGE);
 			CreateTimer(5.0, WelcomeMsgTimer, client,TIMER_FLAG_NO_MAPCHANGE);
 			CreateTimer(60.0, HelpMsgTimer, client,TIMER_FLAG_NO_MAPCHANGE);
 			CreateTimer(300.0, ChallengeMsgTimer, client,TIMER_FLAG_NO_MAPCHANGE);		
@@ -364,7 +368,10 @@ public FPSCheck(QueryCookie:cookie, client, ConVarQueryResult:result, const Stri
 	{
 		new fps_max = StringToInt(cvarValue);        
 		if (fps_max < 100 || fps_max > 300)
-				KickClient(client, "[KZ FPS Check]\nPlease set fps_max between 100 and 300");
+		{
+			CreateTimer(10.0, KickPlayer, client, TIMER_FLAG_NO_MAPCHANGE);
+			PrintToChat(client, "%t", "KickMsg", DARKRED,WHITE,RED,WHITE,fps_max);
+		}
 	}
 }
 
@@ -609,6 +616,19 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 			g_iBotMimicTick[client]++;		
 		}	
 		
+		//slowdown
+		if (g_bJumpPenalty[client] && !IsFakeClient(client))
+		{
+			if (!(GetEntityFlags(client) & FL_ONGROUND) && g_bOnGround[client])	
+			g_bOnGround[client]=false;
+			if ((GetEntityFlags(client) & FL_ONGROUND) && !g_bOnGround[client])	
+			{
+				g_bOnGround[client]=true;	
+				g_bSlowDownCheck[client]=true;
+				SetEntPropFloat(client, Prop_Send, "m_flVelocityModifier", 0.49);
+				CreateTimer(2.0, ResetSlowdownTimer, client,TIMER_FLAG_NO_MAPCHANGE);
+			}
+		}	
 				
 		///////////////////////////////////
 		///
@@ -621,7 +641,7 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 					
 		// prestrafe (forward)
 		//PRESTRAFE+USPSPEED 250.0 (TICKRATE 64 + 128 optimized)
-		if (g_bPreStrafe)
+		if (g_bPreStrafe && !g_bSlowDownCheck[client])
 		{
 			decl String:classname[64];
 			GetClientWeapon(client, classname, 64);
@@ -952,7 +972,7 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 		
 		// landed?		
 		if(GetEntityFlags(client) & FL_ONGROUND && !g_bInvalidGround[client] && !g_bLastInvalidGround[client] && g_bPlayerJumped[client] == true && weapon != -1 && IsValidEntity(weapon) && GetEntProp(client, Prop_Data, "m_nWaterLevel") < 1)
-		{			
+		{		
 			if (g_bJumpStats)
 				Postthink(client);
 		}
@@ -985,7 +1005,6 @@ public Prethink (client)
 	if (!client)
 		return;
 	new weapon = GetEntPropEnt(client, Prop_Data, "m_hActiveWeapon");
-	g_bSlowDownCheck[client] = false;
 	if (!g_bSpectate[client] && IsPlayerAlive(client) && weapon != -1 && IsClientInGame(client))
 	{
 		//water level?

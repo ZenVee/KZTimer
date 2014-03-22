@@ -1,5 +1,15 @@
 ﻿"Phrases"
 {
+	"KickMsg"
+	{
+		"#format"   "{1:c},{2:c},{3:c},{4:c},{5:i}"
+		"en"        "[{1}KZ FPSCHECK{2}] You will be {3}kicked in 10 seconds{4}. Please set fps_max between 100 and 300! (detected: fps_max {5})"
+	}
+	"JumpPenalty3"
+	{
+		"#format"   "{1:c},{2:c}"
+		"en"       "[{1}KZ{2}] Jump penalty forced. (server-sided)"
+	}
 	"NoCpsDuringChallenge"
 	{
 		"#format"   "{1:c},{2:c}"
@@ -618,6 +628,16 @@
 	{
 		"#format"   "{1:c},{2:c}"
 		"en"        "[{1}KZ{2}] Colorchat disabled."
+	}
+	"JumpPenalty1"
+	{
+		"#format"   "{1:c},{2:c}"
+		"en"        "[{1}KZ{2}] Jump penalty enabled."
+	}
+	"JumpPenalty2"
+	{
+		"#format"   "{1:c},{2:c}"
+		"en"        "[{1}KZ{2}] Jump penalty disabled."
 	}
 	"Info1"
 	{

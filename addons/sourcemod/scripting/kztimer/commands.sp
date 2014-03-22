@@ -1339,6 +1339,33 @@ public ShowNames(client)
 		g_bShowNames[client] = true;		
 }
 
+public Action:Client_jumppenalty(client, args) 
+{
+	jumppenalty(client);
+	if (!g_bForceJumpPenalty)
+	{
+		if (g_bJumpPenalty[client])
+			PrintToChat(client, "%t", "JumpPenalty1", MOSSGREEN,WHITE);
+		else
+			PrintToChat(client, "%t", "JumpPenalty2", MOSSGREEN,WHITE);
+	}	
+	return Plugin_Handled;
+}
+
+public jumppenalty(client)
+{
+	if (g_bForceJumpPenalty)
+	{
+		g_bJumpPenalty[client] = true;
+		PrintToChat(client, "%t", "JumpPenalty3", MOSSGREEN,WHITE);
+		return;
+	}
+	if (g_bJumpPenalty[client])
+		g_bJumpPenalty[client] = false;
+	else
+		g_bJumpPenalty[client] = true;
+}
+
 public Action:Client_Colorchat(client, args) 
 {
 	ColorChat(client);
@@ -1490,14 +1517,16 @@ public TeleClient(client,pos)
 		fVelocity[0] = 0.0;
 		fVelocity[1] = 0.0;
 		fVelocity[2] = 0.0;
-		SetEntPropVector(client, Prop_Data, "m_vecVelocity", fVelocity);
-		
-		GetClientAbsOrigin(client,g_fPlayerCordsUndoTp[client]);
-		GetClientEyeAngles(client,g_fPlayerAnglesUndoTp[client]);
-		TeleportEntity(client, g_fPlayerCords[client][actual],g_fPlayerAngles[client][actual],fVelocity);
-		g_CurrentCp[client] += pos;
-		if (g_bClimbersMenuSounds[client]==true)
-			EmitSoundToClient(client,"buttons/blip1.wav",client);
+		if (IsClientInGame(client))
+		{			
+			SetEntPropVector(client, Prop_Data, "m_vecVelocity", fVelocity);
+			GetClientAbsOrigin(client,g_fPlayerCordsUndoTp[client]);
+			GetClientEyeAngles(client,g_fPlayerAnglesUndoTp[client]);
+			TeleportEntity(client, g_fPlayerCords[client][actual],g_fPlayerAngles[client][actual],fVelocity);
+			g_CurrentCp[client] += pos;
+			if (g_bClimbersMenuSounds[client]==true)
+				EmitSoundToClient(client,"buttons/blip1.wav",client);
+		}
 	}		
 }
 
@@ -2017,6 +2046,7 @@ public ShowSrvSettings(client)
 	PrintToConsole(client, "kz_dist_pro_wj %.1f", g_dist_pro_weird);
 	PrintToConsole(client, "kz_dist_leet_wj %.1f", g_dist_leet_weird);
 	PrintToConsole(client, "kz_fps_check %b", g_bfpsCheck);
+	PrintToConsole(client, "kz_force_jump_penalty %b", g_bForceJumpPenalty);
 	PrintToConsole(client, "kz_global_database %b", g_bGlobalDB);	
 	PrintToConsole(client, "kz_godmode %b", g_bgodmode);
 	PrintToConsole(client, "kz_goto %b", g_bGoToServer);
@@ -2127,9 +2157,9 @@ public OptionMenu(client)
 		AddMenuItem(optionmenu, "Spectator list  -  Disabled", "Spectator list  -  Disabled");	
 	//9
 	if (g_bInfoPanel[client])
-		AddMenuItem(optionmenu, "Stats panel  -  Enabled", "Stats panel  -  Enabled");
+		AddMenuItem(optionmenu, "Speed/Keys panel  -  Enabled", "Speed/Keys Panel  -  Enabled");
 	else
-		AddMenuItem(optionmenu, "Stats panel  -  Disabled", "Stats panel  -  Disabled");	
+		AddMenuItem(optionmenu, "Speed/Keys panel  -  Disabled", "Speed/Keys Panel  -  Disabled");	
 	//10
 	if (g_bShowNames[client])
 		AddMenuItem(optionmenu, "Target Name Panel  -  Enabled", "Target name panel  -  Enabled");
@@ -2139,8 +2169,13 @@ public OptionMenu(client)
 	if (g_bGoToClient[client])
 		AddMenuItem(optionmenu, "Goto  -  Enabled", "Goto me  -  Enabled");
 	else
-		AddMenuItem(optionmenu, "Goto  -  Disabled", "Goto me  -  Disabled");				
+		AddMenuItem(optionmenu, "Goto  -  Disabled", "Goto me  -  Disabled");			
 	//12
+	if (g_bJumpPenalty[client])
+		AddMenuItem(optionmenu, "Jump penalty  -  Enabled", "Jump penalty  -  Enabled");
+	else
+		AddMenuItem(optionmenu, "Jump penalty  -  Disabled", "Jump penalty  -  Disabled");					
+	//13
 	if (g_bAutoBhop2)
 	{
 		if (g_bAutoBhopClient[client])
@@ -2179,7 +2214,8 @@ public OptionMenuHandler(Handle:menu, MenuAction:action, param1,param2)
 			case 9: InfoPanel(param1);
 			case 10: ShowNames(param1);
 			case 11: DisableGoTo(param1);
-			case 12: AutoBhop(param1);		
+			case 12: jumppenalty(param1);	
+			case 13: AutoBhop(param1);		
 		}
 		g_OptionMenuLastPage[param1] = param2;
 		OptionMenu(param1);					

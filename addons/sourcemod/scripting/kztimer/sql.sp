@@ -5,45 +5,45 @@ new String:sql_selectChallenges[] 				= "SELECT steamid, steamid2, bet, cp_allow
 new String:sql_selectChallengesCompare[] 		= "SELECT steamid, steamid2, bet FROM challenges where (steamid = '%s' AND steamid2 ='%s') OR (steamid = '%s' AND steamid2 ='%s')";
 
 //TABLE PLAYEROPTIONS
-new String:sql_createPlayerOptions[] 			= "CREATE TABLE IF NOT EXISTS playeroptions (steamid VARCHAR(32), colorchat INT(12) DEFAULT '1', speedmeter INT(12) DEFAULT '0', climbersmenu_sounds INT(12) DEFAULT '1', quake_sounds INT(12) DEFAULT '1', showkeys INT(12) DEFAULT '0', shownames INT(12) DEFAULT '1', goto INT(12) DEFAULT '1', strafesync INT(12) DEFAULT '0', showtime INT(12) DEFAULT '1', hideplayers INT(12) DEFAULT '0', showspecs INT(12) DEFAULT '1', cpmessage INT(12) DEFAULT '0', adv_menu INT(12) DEFAULT '0', knife VARCHAR(32) DEFAULT 'weapon_knife', PRIMARY KEY(steamid));";
-new String:sql_insertPlayerOptions[] 			= "INSERT INTO playeroptions (steamid, colorchat, speedmeter, climbersmenu_sounds, quake_sounds, showkeys, shownames, goto, strafesync, showtime, hideplayers, showspecs, cpmessage, adv_menu, knife) VALUES('%s', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%s');";
-new String:sql_selectPlayerOptions[] 			= "SELECT colorchat, speedmeter, climbersmenu_sounds, quake_sounds, showkeys, shownames, goto, strafesync, showtime, hideplayers, showspecs, cpmessage, adv_menu, knife FROM playeroptions where steamid = '%s'";
-new String:sql_updatePlayerOptions[]			= "UPDATE playeroptions SET colorchat ='%i', speedmeter ='%i', climbersmenu_sounds ='%i', quake_sounds ='%i', showkeys ='%i', shownames ='%i', goto ='%i', strafesync ='%i', showtime ='%i', hideplayers ='%i', showspecs ='%i', cpmessage ='%i', adv_menu ='%i', knife ='%s'  where steamid = '%s'";
+new String:sql_createPlayerOptions[] 			= "CREATE TABLE IF NOT EXISTS playeroptions2 (steamid VARCHAR(32), colorchat INT(12) DEFAULT '1', speedmeter INT(12) DEFAULT '0', climbersmenu_sounds INT(12) DEFAULT '1', quake_sounds INT(12) DEFAULT '1', autobhop INT(12) DEFAULT '0', shownames INT(12) DEFAULT '1', goto INT(12) DEFAULT '1', strafesync INT(12) DEFAULT '0', showtime INT(12) DEFAULT '1', hideplayers INT(12) DEFAULT '0', showspecs INT(12) DEFAULT '1', cpmessage INT(12) DEFAULT '0', adv_menu INT(12) DEFAULT '0', knife VARCHAR(32) DEFAULT 'weapon_knife', jumppenalty INT(12) DEFAULT '0', new1 INT(12) DEFAULT '0', new2 INT(12) DEFAULT '0', new3 INT(12) DEFAULT '0', PRIMARY KEY(steamid));";
+new String:sql_insertPlayerOptions[] 			= "INSERT INTO playeroptions2 (steamid, colorchat, speedmeter, climbersmenu_sounds, quake_sounds, autobhop, shownames, goto, strafesync, showtime, hideplayers, showspecs, cpmessage, adv_menu, knife, jumppenalty, new1, new2, new3) VALUES('%s', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%s', '%i', '%i', '%i', '%i');";
+new String:sql_selectPlayerOptions[] 			= "SELECT colorchat, speedmeter, climbersmenu_sounds, quake_sounds, autobhop, shownames, goto, strafesync, showtime, hideplayers, showspecs, cpmessage, adv_menu, knife, jumppenalty, new1, new2, new3 FROM playeroptions2 where steamid = '%s'";
+new String:sql_updatePlayerOptions[]				= "UPDATE playeroptions2 SET colorchat ='%i', speedmeter ='%i', climbersmenu_sounds ='%i', quake_sounds ='%i', autobhop ='%i', shownames ='%i', goto ='%i', strafesync ='%i', showtime ='%i', hideplayers ='%i', showspecs ='%i', cpmessage ='%i', adv_menu ='%i', knife ='%s', jumppenalty ='%i', new1 = '%i', new2 = '%i', new3 = '%i' where steamid = '%s'";
 
 //TABLE PLAYERRANK
-new String:sql_createPlayerRank[]				= "CREATE TABLE IF NOT EXISTS playerrank (steamid VARCHAR(32), name VARCHAR(32), country VARCHAR(32), points INT(12)  DEFAULT '0', winratio INT(12)  DEFAULT '0', pointsratio INT(12)  DEFAULT '0',finishedmaps INT(12) DEFAULT '0', multiplier INT(12) DEFAULT '0', finishedmapstp INT(12) DEFAULT '0', finishedmapspro INT(12) DEFAULT '0', PRIMARY KEY(steamid));";
+new String:sql_createPlayerRank[]					= "CREATE TABLE IF NOT EXISTS playerrank (steamid VARCHAR(32), name VARCHAR(32), country VARCHAR(32), points INT(12)  DEFAULT '0', winratio INT(12)  DEFAULT '0', pointsratio INT(12)  DEFAULT '0',finishedmaps INT(12) DEFAULT '0', multiplier INT(12) DEFAULT '0', finishedmapstp INT(12) DEFAULT '0', finishedmapspro INT(12) DEFAULT '0', PRIMARY KEY(steamid));";
 new String:sql_insertPlayerRank[] 				= "INSERT INTO playerrank (steamid, name, country) VALUES('%s', '%s', '%s');";
 new String:sql_updatePlayerRankPoints[]			= "UPDATE playerrank SET name ='%s', points ='%i', finishedmapstp ='%i', finishedmapspro='%i' where steamid='%s'";
 new String:sql_updatePlayerRankPoints2[]		= "UPDATE playerrank SET name ='%s', points ='%i', finishedmapstp ='%i', finishedmapspro='%i',winratio = '%i',pointsratio = '%i', country ='%s' where steamid='%s'";
-new String:sql_updatePlayerRank[]				= "UPDATE playerrank SET finishedmaps ='%i', finishedmapstp ='%i', finishedmapspro='%i', multiplier ='%i',winratio = '%i',pointsratio = '%i'  where steamid='%s'";
+new String:sql_updatePlayerRank[]					= "UPDATE playerrank SET finishedmaps ='%i', finishedmapstp ='%i', finishedmapspro='%i', multiplier ='%i',winratio = '%i',pointsratio = '%i'  where steamid='%s'";
 new String:sql_updatePlayerRankChallenge[]		= "UPDATE playerrank SET multiplier ='%i',winratio = '%i',pointsratio = '%i'  where steamid='%s'";
 new String:sql_selectPlayerRankAll[] 			= "SELECT name, steamid FROM playerrank where name like '%s'";
 
-new String:sql_selectTopPlayers[]				= "SELECT name, points, finishedmapspro, finishedmapstp, steamid FROM playerrank ORDER BY points DESC LIMIT 100";
+new String:sql_selectTopPlayers[]					= "SELECT name, points, finishedmapspro, finishedmapstp, steamid FROM playerrank ORDER BY points DESC LIMIT 100";
 new String:sql_selectTopChallengers[]			= "SELECT name, winratio, pointsratio FROM playerrank ORDER BY pointsratio DESC LIMIT 5";
 new String:sql_selectRankedPlayer[]				= "SELECT steamid, name, points, finishedmapstp, finishedmapspro, multiplier, winratio, pointsratio, country from playerrank where steamid='%s'";
 new String:sql_selectRankedPlayersRank[]		= "SELECT name FROM playerrank WHERE points >= (SELECT points FROM playerrank WHERE steamid = '%s') ORDER BY points";
-new String:sql_selectRankedPlayers[]			= "SELECT steamid, name from playerrank where points > 0";
-new String:sql_CountRankedPlayers[] 			= "SELECT COUNT(steamid) FROM playerrank";
+new String:sql_selectRankedPlayers[]				= "SELECT steamid, name from playerrank where points > 0";
+new String:sql_CountRankedPlayers[] 				= "SELECT COUNT(steamid) FROM playerrank";
 new String:sql_CountRankedPlayers2[] 			= "SELECT COUNT(steamid) FROM playerrank where points > 0";
 
 //TABLE PLAYERTIMES
 new String:sql_createPlayertimes[] 				= "CREATE TABLE IF NOT EXISTS playertimes (steamid VARCHAR(32), mapname VARCHAR(32), name VARCHAR(32), teleports INT(12) DEFAULT '-1', runtime FLOAT NOT NULL DEFAULT '-1.0', runtimepro FLOAT NOT NULL DEFAULT '-1.0',teleports_pro INT(12) DEFAULT '0', PRIMARY KEY(steamid,mapname));";
-new String:sql_insertPlayer[] 					= "INSERT INTO playertimes (steamid, mapname, name) VALUES('%s', '%s', '%s');";
+new String:sql_insertPlayer[] 						= "INSERT INTO playertimes (steamid, mapname, name) VALUES('%s', '%s', '%s');";
 new String:sql_insertPlayerTp[] 					= "INSERT INTO playertimes (steamid, mapname, name,runtime, teleports) VALUES('%s', '%s', '%s', '%f', '%i');";
-new String:sql_insertPlayerPro[] 				= "INSERT INTO playertimes (steamid, mapname, name,runtimepro) VALUES('%s', '%s', '%s', '%f');";
-new String:sql_updateRecord[] 					= "UPDATE playertimes SET name = '%s', teleports = '%i', runtime = '%f' WHERE steamid = '%s' AND mapname = '%s';"; 
+new String:sql_insertPlayerPro[] 					= "INSERT INTO playertimes (steamid, mapname, name,runtimepro) VALUES('%s', '%s', '%s', '%f');";
+new String:sql_updateRecord[] 						= "UPDATE playertimes SET name = '%s', teleports = '%i', runtime = '%f' WHERE steamid = '%s' AND mapname = '%s';"; 
 new String:sql_updateRecordPro[]					= "UPDATE playertimes SET name = '%s', runtimepro = '%f' WHERE steamid = '%s' AND mapname = '%s';"; 
-new String:sql_deletePlayer[] 					= "DELETE FROM playertimes where steamid = '%s' AND mapname= '%s' AND runtimepro = -1.0 AND runtime = -1.0";
+new String:sql_deletePlayer[] 						= "DELETE FROM playertimes where steamid = '%s' AND mapname= '%s' AND runtimepro = -1.0 AND runtime = -1.0";
 new String:sql_deleteDeadPlayer[] 				= "DELETE FROM playertimes where runtimepro = -1.0 AND runtime = -1.0;";
 new String:sql_CountFinishedMapsTP[] 			= "SELECT mapname FROM playertimes where steamid='%s' AND runtime > -1.0";
 new String:sql_CountFinishedMapsPro[] 			= "SELECT mapname FROM playertimes where steamid='%s' AND runtimepro > -1.0";
-new String:sql_selectPlayer[] 					= "SELECT steamid FROM playertimes WHERE steamid = '%s' AND mapname = '%s';";
+new String:sql_selectPlayer[] 						= "SELECT steamid FROM playertimes WHERE steamid = '%s' AND mapname = '%s';";
 new String:sql_selectRecordTp[] 					= "SELECT mapname, steamid, name, runtime, teleports  FROM playertimes WHERE steamid = '%s' AND mapname = '%s' AND runtime > -1.0;";
-new String:sql_selectProRecord[] 				= "SELECT mapname, steamid, name, runtimepro FROM playertimes WHERE steamid = '%s' AND mapname = '%s' AND runtimepro > -1.0;";
-new String:sql_selectRecord[] 					= "SELECT steamid FROM playertimes WHERE steamid = '%s' AND mapname = '%s' AND (runtime  > -1.0 OR runtimepro  > -1.0)";
+new String:sql_selectProRecord[] 					= "SELECT mapname, steamid, name, runtimepro FROM playertimes WHERE steamid = '%s' AND mapname = '%s' AND runtimepro > -1.0;";
+new String:sql_selectRecord[] 						= "SELECT steamid FROM playertimes WHERE steamid = '%s' AND mapname = '%s' AND (runtime  > -1.0 OR runtimepro  > -1.0)";
 new String:sql_selectMapRecordCP[] 				= "SELECT runtime, name, teleports FROM playertimes WHERE mapname = '%s' AND runtime  > -1.0 ORDER BY runtime ASC LIMIT 1"; 
-new String:sql_selectMapRecordPro[] 			= "SELECT runtimepro, name FROM playertimes WHERE mapname = '%s' AND runtimepro  > -1.0 ORDER BY runtimepro ASC LIMIT 1"; 
+new String:sql_selectMapRecordPro[] 				= "SELECT runtimepro, name FROM playertimes WHERE mapname = '%s' AND runtimepro  > -1.0 ORDER BY runtimepro ASC LIMIT 1"; 
 new String:sql_selectPersonalRecords[] 			= "SELECT mapname, steamid, name, runtime, runtimepro, teleports  FROM playertimes WHERE steamid = '%s' AND mapname = '%s' AND (runtime  > -1.0 OR runtimepro  > -1.0)"; 
 new String:sql_selectPersonalAllRecords[] 		= "SELECT name, steamid, mapname, runtime as overall, teleports AS tp FROM playertimes WHERE steamid = '%s' AND runtime > -1.0 AND teleports >= 0 UNION SELECT name, steamid, mapname, runtimepro as overall, teleports_pro AS tp FROM playertimes WHERE steamid = '%s' AND runtimepro > -1.0 ORDER BY mapname ASC";
 new String:sql_selectTPClimbers[] 				= "SELECT name, runtime, teleports FROM playertimes WHERE mapname = '%s' AND runtime > -1.0 AND teleports >= 0 ORDER BY runtime ASC LIMIT 20";
@@ -59,28 +59,28 @@ new String:sql_selectTpRecordCount[] 			= "SELECT y.steamid, COUNT(*) AS rekorde
 new String:sql_selectProRecordCount[] 			= "SELECT y.steamid, COUNT(*) AS rekorde FROM (SELECT s.steamid FROM playertimes s INNER JOIN (SELECT mapname, MIN(runtimepro) AS runtimepro FROM playertimes where runtimepro > -1.0  GROUP BY mapname) x ON s.mapname = x.mapname AND s.runtimepro = x.runtimepro) y where y.steamid = '%s' GROUP BY y.steamid ORDER BY rekorde DESC , y.steamid;";
 
 //TABLE PLAYERTMP
-new String:sql_createPlayertmp[] 				= "CREATE TABLE IF NOT EXISTS playertmp (steamid VARCHAR(32), mapname VARCHAR(32), cords1 FLOAT NOT NULL DEFAULT '-1.0', cords2 FLOAT NOT NULL DEFAULT '-1.0', cords3 FLOAT NOT NULL DEFAULT '-1.0', angle1 FLOAT NOT NULL DEFAULT '-1.0',angle2 FLOAT NOT NULL DEFAULT '-1.0',angle3 FLOAT NOT NULL DEFAULT '-1.0', teleports INT(12) DEFAULT '-1.0', checkpoints INT(12) DEFAULT '-1.0', runtimeTmp FLOAT NOT NULL DEFAULT '-1.0', PRIMARY KEY(steamid,mapname));";
+new String:sql_createPlayertmp[] 					= "CREATE TABLE IF NOT EXISTS playertmp (steamid VARCHAR(32), mapname VARCHAR(32), cords1 FLOAT NOT NULL DEFAULT '-1.0', cords2 FLOAT NOT NULL DEFAULT '-1.0', cords3 FLOAT NOT NULL DEFAULT '-1.0', angle1 FLOAT NOT NULL DEFAULT '-1.0',angle2 FLOAT NOT NULL DEFAULT '-1.0',angle3 FLOAT NOT NULL DEFAULT '-1.0', teleports INT(12) DEFAULT '-1.0', checkpoints INT(12) DEFAULT '-1.0', runtimeTmp FLOAT NOT NULL DEFAULT '-1.0', PRIMARY KEY(steamid,mapname));";
 new String:sql_insertPlayerTmp[]  				= "INSERT INTO playertmp (steamid, mapname) VALUES ('%s', '%s');";
-new String:sql_updateRunTmp[] 					= "UPDATE playertmp SET cords1 = '%f', cords2 = '%f', cords3 = '%f', angle1 = '%f', angle2 = '%f', angle3 = '%f', teleports = '%i', checkpoints = '%i', runtimeTmp = '%f' where steamid = '%s' and mapname ='%s';";
-new String:sql_updatePlayerTmp[] 				= "UPDATE playertmp SET mapname ='%s' WHERE steamid = '%s';";
-new String:sql_deletePlayerTmp[] 				= "DELETE FROM playertmp where steamid = '%s' AND mapname= '%s';";
+new String:sql_updateRunTmp[] 						= "UPDATE playertmp SET cords1 = '%f', cords2 = '%f', cords3 = '%f', angle1 = '%f', angle2 = '%f', angle3 = '%f', teleports = '%i', checkpoints = '%i', runtimeTmp = '%f' where steamid = '%s' and mapname ='%s';";
+new String:sql_updatePlayerTmp[] 					= "UPDATE playertmp SET mapname ='%s' WHERE steamid = '%s';";
+new String:sql_deletePlayerTmp[] 					= "DELETE FROM playertmp where steamid = '%s' AND mapname= '%s';";
 new String:sql_deleteDeadPlayerTmp[] 			= "DELETE FROM playertmp where runtimeTmp = -1.0;";
 new String:sql_selectLastRun[] 					= "SELECT cords1,cords2,cords3, angle1, angle2, angle3, teleports, checkpoints, runtimeTmp FROM playertmp WHERE steamid = '%s' AND mapname = '%s';";
-new String:sql_selectPlayerTmp[] 				= "SELECT steamid, mapname FROM playertmp WHERE steamid = '%s';";
+new String:sql_selectPlayerTmp[] 					= "SELECT steamid, mapname FROM playertmp WHERE steamid = '%s';";
 
 //TABLE JUMMPSTATS
 new String:sql_createPlayerjumpstats[] 			= "CREATE TABLE IF NOT EXISTS playerjumpstats2 (steamid VARCHAR(32), name VARCHAR(32), multibhoprecord FLOAT NOT NULL DEFAULT '-1.0',  multibhoppre FLOAT NOT NULL DEFAULT '-1.0', multibhopmax FLOAT NOT NULL DEFAULT '-1.0', multibhopstrafes INT(12),multibhopcount INT(12),multibhopsync INT(12), multibhopheight FLOAT NOT NULL DEFAULT '-1.0', bhoprecord FLOAT NOT NULL DEFAULT '-1.0',  bhoppre FLOAT NOT NULL DEFAULT '-1.0', bhopmax FLOAT NOT NULL DEFAULT '-1.0', bhopstrafes INT(12),bhopsync INT(12), bhopheight FLOAT NOT NULL DEFAULT '-1.0', ljrecord FLOAT NOT NULL DEFAULT '-1.0', ljpre FLOAT NOT NULL DEFAULT '-1.0', ljmax FLOAT NOT NULL DEFAULT '-1.0', ljstrafes INT(12),ljsync INT(12), ljheight FLOAT NOT NULL DEFAULT '-1.0', dropbhoprecord FLOAT NOT NULL DEFAULT '-1.0',  dropbhoppre FLOAT NOT NULL DEFAULT '-1.0', dropbhopmax FLOAT NOT NULL DEFAULT '-1.0', dropbhopstrafes INT(12),dropbhopsync INT(12), dropbhopheight FLOAT NOT NULL DEFAULT '-1.0', wjrecord FLOAT NOT NULL DEFAULT '-1.0', wjpre FLOAT NOT NULL DEFAULT '-1.0', wjmax FLOAT NOT NULL DEFAULT '-1.0', wjstrafes INT(12),wjsync INT(12), wjheight FLOAT NOT NULL DEFAULT '-1.0', PRIMARY KEY(steamid));";
 new String:sql_insertPlayerJumpBhop[] 			= "INSERT INTO playerjumpstats2 (steamid, name, bhoprecord, bhoppre, bhopmax, bhopstrafes, bhopsync, bhopheight) VALUES('%s', '%s', '%f', '%f', '%f', '%i', '%i', '%f');";
-new String:sql_insertPlayerJumpLj[] 			= "INSERT INTO playerjumpstats2 (steamid, name, ljrecord, ljpre, ljmax, ljstrafes, ljsync, ljheight) VALUES('%s', '%s', '%f', '%f', '%f', '%i', '%i', '%f');";
+new String:sql_insertPlayerJumpLj[] 				= "INSERT INTO playerjumpstats2 (steamid, name, ljrecord, ljpre, ljmax, ljstrafes, ljsync, ljheight) VALUES('%s', '%s', '%f', '%f', '%f', '%i', '%i', '%f');";
 new String:sql_insertPlayerJumpMultiBhop[] 	= "INSERT INTO playerjumpstats2 (steamid, name, multibhoprecord, multibhoppre, multibhopmax, multibhopstrafes, multibhopcount, multibhopsync, multibhopheight) VALUES('%s', '%s', '%f', '%f', '%f', '%i', '%i', '%i', '%f');";
 new String:sql_insertPlayerJumpDropBhop[] 		= "INSERT INTO playerjumpstats2 (steamid, name, dropbhoprecord, dropbhoppre, dropbhopmax, dropbhopstrafes, dropbhopsync, dropbhopheight) VALUES('%s', '%s', '%f', '%f', '%f', '%i', '%i', '%f');";
-new String:sql_insertPlayerJumpWJ[] 			= "INSERT INTO playerjumpstats2 (steamid, name, wjrecord, wjpre, wjmax, wjstrafes, wjsync, wjheight) VALUES('%s', '%s', '%f', '%f', '%f', '%i', '%i', '%f');";
+new String:sql_insertPlayerJumpWJ[] 				= "INSERT INTO playerjumpstats2 (steamid, name, wjrecord, wjpre, wjmax, wjstrafes, wjsync, wjheight) VALUES('%s', '%s', '%f', '%f', '%f', '%i', '%i', '%f');";
 
-new String:sql_updateLj[] 						= "UPDATE playerjumpstats2 SET name='%s', ljrecord ='%f', ljpre ='%f', ljmax ='%f', ljstrafes='%i', ljsync='%i', ljheight='%f' WHERE steamid = '%s';";
+new String:sql_updateLj[] 							= "UPDATE playerjumpstats2 SET name='%s', ljrecord ='%f', ljpre ='%f', ljmax ='%f', ljstrafes='%i', ljsync='%i', ljheight='%f' WHERE steamid = '%s';";
 new String:sql_updateBhop[] 						= "UPDATE playerjumpstats2 SET name='%s', bhoprecord ='%f', bhoppre ='%f', bhopmax ='%f', bhopstrafes='%i', bhopsync='%i', bhopheight='%f' WHERE steamid = '%s';";
-new String:sql_updateMultiBhop[] 				= "UPDATE playerjumpstats2 SET name='%s', multibhoprecord ='%f', multibhoppre ='%f', multibhopmax ='%f', multibhopstrafes='%i', multibhopcount='%i', multibhopsync='%i', multibhopheight='%f' WHERE steamid = '%s';";
+new String:sql_updateMultiBhop[] 					= "UPDATE playerjumpstats2 SET name='%s', multibhoprecord ='%f', multibhoppre ='%f', multibhopmax ='%f', multibhopstrafes='%i', multibhopcount='%i', multibhopsync='%i', multibhopheight='%f' WHERE steamid = '%s';";
 new String:sql_updateDropBhop[] 					= "UPDATE playerjumpstats2 SET name='%s', dropbhoprecord ='%f', dropbhoppre ='%f', dropbhopmax ='%f', dropbhopstrafes='%i', dropbhopsync='%i', dropbhopheight='%f' WHERE steamid = '%s';";
-new String:sql_updateWJ[] 						= "UPDATE playerjumpstats2 SET name='%s', wjrecord ='%f', wjpre ='%f', wjmax ='%f', wjstrafes='%i', wjsync='%i', wjheight='%f' WHERE steamid = '%s';";
+new String:sql_updateWJ[] 							= "UPDATE playerjumpstats2 SET name='%s', wjrecord ='%f', wjpre ='%f', wjmax ='%f', wjstrafes='%i', wjsync='%i', wjheight='%f' WHERE steamid = '%s';";
 
 new String:sql_selectPlayerJumpTopLJ[] 			= "SELECT name, ljrecord,ljstrafes, steamid FROM playerjumpstats2 WHERE ljrecord > -1.0 ORDER BY ljrecord DESC LIMIT 20";
 new String:sql_selectPlayerJumpTopBhop[] 		= "SELECT name, bhoprecord,bhopstrafes, steamid FROM playerjumpstats2 WHERE bhoprecord > -1.0 ORDER BY bhoprecord DESC LIMIT 20";
@@ -88,17 +88,17 @@ new String:sql_selectPlayerJumpTopMultiBhop[] 	= "SELECT name, multibhoprecord,m
 new String:sql_selectPlayerJumpTopDropBhop[] 	= "SELECT name, dropbhoprecord,dropbhopstrafes, steamid FROM playerjumpstats2 WHERE dropbhoprecord > -1.0 ORDER BY dropbhoprecord DESC LIMIT 20";
 new String:sql_selectPlayerJumpTopWJ[] 			= "SELECT name, wjrecord,wjstrafes, steamid FROM playerjumpstats2 WHERE wjrecord > -1.0 ORDER BY wjrecord DESC LIMIT 20";
 
-new String:sql_selectPlayerJumpLJ[] 			= "SELECT steamid, name, ljrecord FROM playerjumpstats2 WHERE steamid = '%s';";
+new String:sql_selectPlayerJumpLJ[] 				= "SELECT steamid, name, ljrecord FROM playerjumpstats2 WHERE steamid = '%s';";
 new String:sql_selectPlayerJumpBhop[] 			= "SELECT steamid, name, bhoprecord FROM playerjumpstats2 WHERE steamid = '%s';";
 new String:sql_selectPlayerJumpMultiBhop[] 	= "SELECT steamid, name, multibhoprecord FROM playerjumpstats2 WHERE steamid = '%s';";
-new String:sql_selectPlayerJumpWJ[] 			= "SELECT steamid, name, wjrecord FROM playerjumpstats2 WHERE steamid = '%s';";
+new String:sql_selectPlayerJumpWJ[] 				= "SELECT steamid, name, wjrecord FROM playerjumpstats2 WHERE steamid = '%s';";
 new String:sql_selectPlayerJumpDropBhop[] 		= "SELECT steamid, name, dropbhoprecord FROM playerjumpstats2 WHERE steamid = '%s';";
 
-new String:sql_selectJumpStats[] 				= "SELECT steamid, name, bhoprecord,bhoppre,bhopmax,bhopstrafes,bhopsync, ljrecord, ljpre, ljmax, ljstrafes,ljsync, multibhoprecord,multibhoppre,multibhopmax,multibhopstrafes,multibhopcount,multibhopsync, wjrecord, wjpre, wjmax, wjstrafes, wjsync, dropbhoprecord, dropbhoppre, dropbhopmax, dropbhopstrafes, dropbhopsync, ljheight, bhopheight, multibhopheight, dropbhopheight, wjheight FROM playerjumpstats2 WHERE (wjrecord > -1.0 OR dropbhoprecord > -1.0 OR ljrecord > -1.0 OR bhoprecord > -1.0 OR multibhoprecord > -1.0) AND steamid = '%s';";
+new String:sql_selectJumpStats[] 					= "SELECT steamid, name, bhoprecord,bhoppre,bhopmax,bhopstrafes,bhopsync, ljrecord, ljpre, ljmax, ljstrafes,ljsync, multibhoprecord,multibhoppre,multibhopmax,multibhopstrafes,multibhopcount,multibhopsync, wjrecord, wjpre, wjmax, wjstrafes, wjsync, dropbhoprecord, dropbhoppre, dropbhopmax, dropbhopstrafes, dropbhopsync, ljheight, bhopheight, multibhopheight, dropbhopheight, wjheight FROM playerjumpstats2 WHERE (wjrecord > -1.0 OR dropbhoprecord > -1.0 OR ljrecord > -1.0 OR bhoprecord > -1.0 OR multibhoprecord > -1.0) AND steamid = '%s';";
 new String:sql_selectPlayerRankMultiBhop[]		= "SELECT name FROM playerjumpstats2 WHERE multibhoprecord >= (SELECT multibhoprecord FROM playerjumpstats2 WHERE steamid = '%s' AND multibhoprecord > -1.0) AND multibhoprecord  > -1.0 ORDER BY multibhoprecord;";
-new String:sql_selectPlayerRankLj[] 			= "SELECT name FROM playerjumpstats2 WHERE ljrecord >= (SELECT ljrecord FROM playerjumpstats2 WHERE steamid = '%s' AND ljrecord > -1.0) AND ljrecord  > -1.0 ORDER BY ljrecord;";
+new String:sql_selectPlayerRankLj[] 				= "SELECT name FROM playerjumpstats2 WHERE ljrecord >= (SELECT ljrecord FROM playerjumpstats2 WHERE steamid = '%s' AND ljrecord > -1.0) AND ljrecord  > -1.0 ORDER BY ljrecord;";
 new String:sql_selectPlayerRankBhop[] 			= "SELECT name FROM playerjumpstats2 WHERE bhoprecord >= (SELECT bhoprecord FROM playerjumpstats2 WHERE steamid = '%s' AND bhoprecord > -1.0) AND bhoprecord  > -1.0 ORDER BY bhoprecord;";
-new String:sql_selectPlayerRankWJ[] 			= "SELECT name FROM playerjumpstats2 WHERE wjrecord >= (SELECT wjrecord FROM playerjumpstats2 WHERE steamid = '%s' AND wjrecord > -1.0) AND wjrecord  > -1.0 ORDER BY wjrecord;";
+new String:sql_selectPlayerRankWJ[] 				= "SELECT name FROM playerjumpstats2 WHERE wjrecord >= (SELECT wjrecord FROM playerjumpstats2 WHERE steamid = '%s' AND wjrecord > -1.0) AND wjrecord  > -1.0 ORDER BY wjrecord;";
 new String:sql_selectPlayerRankDropBhop[] 		= "SELECT name FROM playerjumpstats2 WHERE dropbhoprecord >= (SELECT dropbhoprecord FROM playerjumpstats2 WHERE steamid = '%s' AND dropbhoprecord > -1.0) AND dropbhoprecord  > -1.0 ORDER BY dropbhoprecord;";
 
 // TABLE MAP BUTTONS
@@ -107,14 +107,14 @@ new String:sql_deleteMapButtons[] 				= "DELETE FROM MapButtons where mapname= '
 new String:sql_insertMapButtons[] 				= "INSERT INTO MapButtons (mapname, cords1Start, cords2Start,cords3Start,cords1End,cords2End,cords3End,ang_start,ang_end) VALUES('%s', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f');";
 new String:sql_selectMapButtons[] 				= "SELECT cords1Start,cords2Start,cords3Start,cords1End,cords2End,cords3End,ang_start,ang_end FROM MapButtons WHERE mapname = '%s';";
 new String:sql_updateMapButtonsStart[] 			= "UPDATE MapButtons SET cords1Start ='%f', cords2Start ='%f', cords3Start ='%f', ang_start = '%f' WHERE mapname = '%s';";
-new String:sql_updateMapButtonsEnd[]			= "UPDATE MapButtons SET cords1End ='%f', cords2End ='%f', cords3End ='%f', ang_end = '%f' WHERE mapname = '%s';";
+new String:sql_updateMapButtonsEnd[]				= "UPDATE MapButtons SET cords1End ='%f', cords2End ='%f', cords3End ='%f', ang_end = '%f' WHERE mapname = '%s';";
 
 
 // GLOBAL TABLE
 new String:sqlglobal_selectGlobalRecord[] 		= "SELECT name, runtime, teleports FROM player WHERE mapname = '%s' ORDER BY runtime ASC LIMIT 5";
 new String:sqlglobal_selectGlobalTop[] 			= "SELECT name, runtime, teleports FROM player WHERE mapname = '%s' ORDER BY runtime ASC LIMIT 5";
-new String:sqlglobal_selectTop5Players[] 			= "SELECT runtime, steamid FROM player WHERE mapname = '%s' ORDER BY runtime ASC LIMIT 5";
-new String:sqlglobal_selectPlayers[] 				= "SELECT runtime, steamid, mapname FROM player WHERE mapname = '%s' ORDER BY runtime ASC";
+new String:sqlglobal_selectTop5Players[] 		= "SELECT runtime, steamid FROM player WHERE mapname = '%s' ORDER BY runtime ASC LIMIT 5";
+new String:sqlglobal_selectPlayers[] 			= "SELECT runtime, steamid, mapname FROM player WHERE mapname = '%s' ORDER BY runtime ASC";
 new String:sqlglobal_deletePlayer[] 				= "DELETE FROM player WHERE steamid = '%s' AND mapname = '%s'"; 
 new String:sqlglobal_insertPlayer[] 				= "INSERT INTO player (steamid, mapname, name, runtime, teleports) VALUES('%s', '%s', '%s', '%f', '%i');";
 new String:sqlglobal_updatePlayer[] 				= "UPDATE player SET name = '%s', runtime = '%f', teleports = '%i' WHERE steamid = '%s' AND mapname = '%s';"; 
@@ -2450,7 +2450,7 @@ public sql_selectRecordCallback(Handle:owner, Handle:hndl, const String:error[],
 public db_updatePlayerOptions(client, String:szSteamId[32])
 {
 	decl String:szQuery[512];
-	Format(szQuery, 512, sql_updatePlayerOptions, BooltoInt(g_bColorChat[client]),BooltoInt(g_bInfoPanel[client]),BooltoInt(g_bClimbersMenuSounds[client]),BooltoInt(g_bEnableQuakeSounds[client]), BooltoInt(g_bAutoBhopClient[client]),BooltoInt(g_bShowNames[client]),BooltoInt(g_bGoToClient[client]),BooltoInt(g_bStrafeSync[client]),BooltoInt(g_bShowTime[client]),BooltoInt(g_bHide[client]),BooltoInt(g_bShowSpecs[client]),BooltoInt(g_bCPTextMessage[client]),BooltoInt(g_bAdvancedClimbersMenu[client]),"weapon_knife",szSteamId);
+	Format(szQuery, 512, sql_updatePlayerOptions, BooltoInt(g_bColorChat[client]),BooltoInt(g_bInfoPanel[client]),BooltoInt(g_bClimbersMenuSounds[client]),	BooltoInt(g_bEnableQuakeSounds[client]), BooltoInt(g_bAutoBhopClient[client]),BooltoInt(g_bShowNames[client]),BooltoInt(g_bGoToClient[client]),BooltoInt(g_bStrafeSync[client]),BooltoInt(g_bShowTime[client]),BooltoInt(g_bHide[client]),BooltoInt(g_bShowSpecs[client]),BooltoInt(g_bCPTextMessage[client]),BooltoInt(g_bAdvancedClimbersMenu[client]),"weapon_knife",BooltoInt(g_bJumpPenalty[client]),0,0,0,szSteamId);
 	SQL_TQuery(g_hDb, SQL_CheckCallback, szQuery, client,DBPrio_Low);
 }
 		
@@ -3744,6 +3744,7 @@ public db_viewPlayerOptionsCallback(Handle:owner, Handle:hndl, const String:erro
 		g_bShowSpecs[client]=IntoBool(SQL_FetchInt(hndl, 10));		
 		g_bCPTextMessage[client]=IntoBool(SQL_FetchInt(hndl, 11));
 		g_bAdvancedClimbersMenu[client]=IntoBool(SQL_FetchInt(hndl, 12));
+		g_bJumpPenalty[client]=IntoBool(SQL_FetchInt(hndl, 14));
 		//org
 		g_borg_AutoBhopClient[client] = g_bAutoBhopClient[client];
 		g_borg_ColorChat[client] = g_bColorChat[client];
@@ -3758,6 +3759,7 @@ public db_viewPlayerOptionsCallback(Handle:owner, Handle:hndl, const String:erro
 		g_borg_ShowSpecs[client] = g_bShowSpecs[client]; 
 		g_borg_CPTextMessage[client] = g_bCPTextMessage[client];
 		g_borg_AdvancedClimbersMenu[client] = g_bAdvancedClimbersMenu[client];
+		g_borg_JumpPenalty[client] = g_bJumpPenalty[client];
 	}
 	else
 	{
@@ -3767,7 +3769,7 @@ public db_viewPlayerOptionsCallback(Handle:owner, Handle:hndl, const String:erro
 			GetClientAuthString(client, szSteamId, 32);
 		else
 			return;
-		Format(szQuery, 512, sql_insertPlayerOptions, szSteamId, 1,0,1,1,1,1,1,0,1,0,1,0,0,"weapon_knife")
+		Format(szQuery, 512, sql_insertPlayerOptions, szSteamId, 1,0,1,1,1,1,1,0,1,0,1,0,0,"weapon_knife",0,0,0,0)
 		SQL_TQuery(g_hDb, SQL_InsertCheckCallback, szQuery,DBPrio_Low);			
 		g_borg_ColorChat[client] = true;
 		g_borg_InfoPanel[client] = false;
@@ -3782,6 +3784,7 @@ public db_viewPlayerOptionsCallback(Handle:owner, Handle:hndl, const String:erro
 		g_borg_CPTextMessage[client] = false;
 		g_borg_AdvancedClimbersMenu[client] = true;
 		g_borg_AutoBhopClient[client] = true;
+		g_borg_JumpPenalty[client] = false;
 	}
 }
 	
