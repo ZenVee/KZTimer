@@ -1,5 +1,5 @@
 https://forums.alliedmods.net/showthread.php?t=223274
-KZTimer Nightly 
+KZTimer Snapshots 
 =======
 
 v1.11
@@ -10,3 +10,6 @@ v1.11
 - detailed player view (top 100 players & jump top's)
 - optimized default jumpstats values
 - optimized map cfgs (cfg/sourcemod/kztimer/..)
+- added player option jump penalty
+- added server cvar kz_force_jump_penalty
+- new global db password
