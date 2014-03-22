@@ -12,4 +12,3 @@ v1.11
 - optimized map cfgs (cfg/sourcemod/kztimer/..)
 - added player option jump penalty
 - added server cvar kz_force_jump_penalty
-- new global db password
