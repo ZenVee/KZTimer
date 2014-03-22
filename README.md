@@ -1,7 +1,8 @@
-KZTimer
+KZTimer Nightly 
+Changelog
 =======
 
-v1.11 Nightly Changelog
+v1.11
 - added kz_fps_check 1 to settings enforcer (0 < fps_max <= 300)
 - added height to bhop, multibhop, dropbhop & wj jumpstats
 - new db table playerjumpstats2 replaces playerjumpstats (added ljheight, wjheight, bhopheight, dropbhopheight, multibhopheight)
