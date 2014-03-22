@@ -11,7 +11,7 @@
 #include <geoip>
 #include <colors>
 #undef REQUIRE_EXTENSIONS
-#define VERSION "1.11 Nightly #2"
+#define VERSION "1.11"
 #define ADMIN_LEVEL ADMFLAG_UNBAN
 #define WHITE 0x01
 #define DARKRED 0x02
@@ -35,18 +35,6 @@
 #define MAX_MAPS 1000
 #define MAX_PR_PLAYERS 10000
 #define MAX_STRAFES 100
-
-/*
-(v1.11 changelog)
-- added kz_fps_check 1 to settings enforcer (0 < fps_max <= 300)
-- added height to bhop, multibhop, dropbhop & wj jumpstats
-- new db table playerjumpstats2 replaces playerjumpstats (added ljheight, wjheight, bhopheight, dropbhopheight, multibhopheight)
-- added jump height to profile jumpstats menu
-- detailed player view (top 100 players & jump top's)
-- optimized default jumpstats values
-- optimized map cfgs (cfg/sourcemod/kztimer/..)
-- new global db password
-*/
 
 //botmimic2
 #define MAX_RECORD_NAME_LENGTH 64
