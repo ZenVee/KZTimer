@@ -1,5 +1,4 @@
 KZTimer Nightly 
-Changelog
 =======
 
 v1.11
