@@ -992,11 +992,23 @@ public OnMapStart()
 	if(StrEqual(g_szMapTag[0],"surf") || StrEqual(g_szMapTag[0],"bhop") || StrEqual(g_szMapTag[0],"mg"))
 		g_bAutoBhop2=true;
 		
+	
+	new Handle:tmph = FindPluginByFile("macrodox.smx");
 	if (g_bAutoBhop2)
-		ServerCommand("sm plugins unload macrodox.smx");
+	{
+		tmph = FindPluginByFile("macrodox.smx");
+			if (tmph != INVALID_HANDLE && GetPluginStatus(tmph) == Plugin_Running) 
+				ServerCommand("sm plugins unload macrodox.smx");
+	}
 	else
-		ServerCommand("sm plugins load macrodox.smx");	
-		
+	{	
+		tmph = FindPluginByFile("macrodox.smx");
+		if (tmph != INVALID_HANDLE && GetPluginStatus(tmph) != Plugin_Running) 
+			ServerCommand("sm plugins load macrodox.smx");	
+	
+	}
+	if (tmph != INVALID_HANDLE)
+		CloseHandle(tmph);
 }
 
 public OnConfigsExecuted()
@@ -1499,7 +1511,12 @@ public OnSettingChanged(Handle:convar, const String:oldValue[], const String:new
 			if(StrEqual(g_szMapTag[0],"surf") || StrEqual(g_szMapTag[0],"bhop") || StrEqual(g_szMapTag[0],"mg"))
 			{
 				g_bAutoBhop2=true;
-				ServerCommand("sm plugins unload macrodox.smx");
+				new Handle:tmp = FindPluginByFile("macrodox.smx");
+				tmp = FindPluginByFile("macrodox.smx");
+				if (tmp != INVALID_HANDLE && GetPluginStatus(tmp) == Plugin_Running) 
+					ServerCommand("sm plugins unload macrodox.smx");
+				if (tmp != INVALID_HANDLE)
+					CloseHandle(tmp);
 			}
 			else
 				g_bAutoBhop2=false;
@@ -1508,10 +1525,15 @@ public OnSettingChanged(Handle:convar, const String:oldValue[], const String:new
 		{
 			g_bAutoBhop = false;
 			g_bAutoBhop2 = false;
-			ServerCommand("sm plugins load macrodox.smx");
+			new Handle:tmp = FindPluginByFile("macrodox.smx");
+			tmp = FindPluginByFile("macrodox.smx");
+			if (tmp != INVALID_HANDLE && GetPluginStatus(tmp) != Plugin_Running) 
+				ServerCommand("sm plugins load macrodox.smx");	
+			if (tmp != INVALID_HANDLE)
+				CloseHandle(tmp);
 		}
 	}		
-	
+		
 	if(convar == g_hCountry)
 	{
 		if(newValue[0] == '1')
