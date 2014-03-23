@@ -2,10 +2,12 @@ package including:
 - stripper addon (linux version) + filter configs
 - sm plugins: ConnectMessage (country), show right next map, knife chooser, macrodox bhop protection, mapchangeforcer, mapchooser extended, multibhops, spawntools7
 - sm extentions: dhooks, cleaner (only linux, win version broken since february2014)
-- kztimer database (map buttons set for some kz maps) - database.cfg already configured for kztimer
+- kztimer database (map buttons already set for kz maps without implemented buttons)
+  (database.cfg already pre-configured for kztimer)
 - GeoIP database
 - Spawnpoints and .nav files for several KZ&Bhop maps
 - SMLib
+- mapcycle.txt & gamemodes_server.txt (kz maps)
 
 howto install:
 1. download latest metamod + sourcemod version 
