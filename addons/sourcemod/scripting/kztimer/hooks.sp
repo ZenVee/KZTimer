@@ -989,15 +989,111 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 		g_fLastPosition[client] = origin;
 		g_LastButton[client] = buttons;
 	}	
+	
+	//MACRODOX BHOP PROTECTION
+	//https://forums.alliedmods.net/showthread.php?p=1678026
+	if(IsValidEntity(client) && IsClientInGame(client) && IsPlayerAlive(client))
+	{
+		static bool:bHoldingJump[MAXPLAYERS + 1];
+		static bLastOnGround[MAXPLAYERS + 1];
+		if(buttons & IN_JUMP)
+		{
+			if(!bHoldingJump[client])
+			{
+				bHoldingJump[client] = true;//started pressing +jump
+				aiJumps[client]++;
+				if (bLastOnGround[client] && (GetEntityFlags(client) & FL_ONGROUND))
+				{
+					afAvgPerfJumps[client] = ( afAvgPerfJumps[client] * 9.0 + 0 ) / 10.0;
+				}
+				else if (!bLastOnGround[client] && (GetEntityFlags(client) & FL_ONGROUND))
+				{
+					afAvgPerfJumps[client] = ( afAvgPerfJumps[client] * 9.0 + 1 ) / 10.0;
+				}
+			}
+		}
+		else
+			if(bHoldingJump[client])
+				bHoldingJump[client] = false;
+		bLastOnGround[client] = GetEntityFlags(client) & FL_ONGROUND;
+		if ((buttons & IN_LEFT) || (buttons & IN_RIGHT))
+		ForcePlayerSuicide(client);
+    }
 	return Plugin_Continue;
 }
 
+
+public Action:Event_OnJumpMacroDox(Handle:Event, const String:Name[], bool:Broadcast)
+{
+	new client = GetClientOfUserId(GetEventInt(Event, "userid"));
+	if(g_bBhopHackProtection && !IsFakeClient(client))
+	{	
+		afAvgJumps[client] = ( afAvgJumps[client] * 9.0 + float(aiJumps[client]) ) / 10.0;  
+		decl Float:vec_vel[3];
+		GetEntPropVector(client, Prop_Data, "m_vecVelocity", vec_vel);
+		vec_vel[2] = 0.0;
+		new Float:speed = GetVectorLength(vec_vel);
+		afAvgSpeed[client] = (afAvgSpeed[client] * 9.0 + speed) / 10.0;
+		aaiLastJumps[client][aiLastPos[client]] = aiJumps[client];
+		aiLastPos[client]++;
+		if (aiLastPos[client] == 30)
+			aiLastPos[client] = 0;   
+		if (afAvgJumps[client] > 15.0)
+		{
+			if ((aiPatternhits[client] > 0) && (aiJumps[client] == aiPattern[client]))
+			{
+				aiPatternhits[client]++;
+				if ((aiPatternhits[client] > 15) && (!bBanFlagged[client]))
+					PerformBan(client);
+			}
+			else 
+				if ((aiPatternhits[client] > 0) && (aiJumps[client] != aiPattern[client]))
+					aiPatternhits[client] -= 2;
+				else
+				{
+					aiPattern[client] = aiJumps[client];
+					aiPatternhits[client] = 2;
+				}      
+		}
+		else 
+			if(aiJumps[client] > 1)
+			aiAutojumps[client] = 0;
+			else 
+				if((afAvgJumps[client] <1.1) && (!bBanFlagged[client]))
+				{	
+					bSurfCheck[client] = true;
+					if (aiIgnoreCount[client])
+						aiIgnoreCount[client]--;
+					if (speed > 350 && aiIgnoreCount[client] == 0)
+					{
+						aiAutojumps[client]++;
+						if (aiAutojumps[client] >= 20)
+							PerformBan(client);
+					}
+					else if (aiAutojumps[client])
+						aiAutojumps[client]--;				
+				} 
+				
+		aiJumps[client] = 0;
+		new Float:tempvec[3];
+		tempvec = avLastPos[client];
+		GetEntPropVector(client, Prop_Send, "m_vecOrigin", avLastPos[client]);
+		
+		new Float:len = GetVectorDistance(avLastPos[client], tempvec, true);
+		if (len < 30.0)  
+			aiIgnoreCount[client] = 2;
+		
+		if (afAvgPerfJumps[client] >= 0.94 && !bBanFlagged[client])						
+			 PerformBan(client);
+	}
+}
 
 public Action:Event_OnJump(Handle:Event, const String:Name[], bool:Broadcast)
 {
 	new client = GetClientOfUserId(GetEventInt(Event, "userid"));
 	if (g_bJumpStats)
 		Prethink(client);
+
 }
 
 public Prethink (client)

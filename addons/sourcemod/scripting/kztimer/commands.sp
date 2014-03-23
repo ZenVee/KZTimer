@@ -7,20 +7,35 @@ public Action:Client_Usp(client, args)
 	return Plugin_Handled;
 }
 
-public GiveUsp(client)
+//MACRODOX BHOP PROTECTION
+//https://forums.alliedmods.net/showthread.php?p=1678026
+public Action:Command_Stats(client, args)
 {
-	if(!IsPlayerAlive(client) || GetClientTeam(client) == 1)
-		return;		
-	g_UspDrops[client]++;
-	GivePlayerItem(client, "weapon_usp_silencer");
-	new ammoTypeCount = GetEntPropArraySize(client, Prop_Send, "m_iAmmo")
-	for (new i = 0; i < ammoTypeCount; ++i)
-	{
-		SetEntProp(client, Prop_Send, "m_iAmmo", 0, _, i);
-	}
-	if (!g_bPreStrafe)
-		PrintToChat(client, "%t", "Usp1", MOSSGREEN,WHITE);
-	PrintToChat(client, "%t", "Usp2", MOSSGREEN,WHITE);
+    if (args < 1)
+    {
+        ReplyToCommand(client, "[%cKZ%c] Usage: !bhopcheck <name>",MOSSGREEN,WHITE);
+        return Plugin_Handled;
+    }   
+    decl String:arg[65];
+    GetCmdArg(1, arg, sizeof(arg));   
+    decl String:target_name[MAX_TARGET_LENGTH];
+    decl target_list[MAXPLAYERS], target_count, bool:tn_is_ml;  
+    if ((target_count = ProcessTargetString(
+                    arg,
+                    client,
+                    target_list,
+                    MAXPLAYERS,
+                    COMMAND_FILTER_NO_IMMUNITY,
+                    target_name,
+                    sizeof(target_name),
+                    tn_is_ml)) <= 0)
+    {
+        PrintToConsole(client, "Not found or invalid parameter.");
+        return Plugin_Handled;
+    }    
+    for (new i = 0; i < target_count; i++)
+        PerformStats(client, target_list[i]);      
+    return Plugin_Handled;
 }
 
 public Action:Client_Challenge(client, args)
@@ -1812,7 +1827,7 @@ public MapTopMenu(client)
 	new Handle:topmenu2 = CreateMenu(MapTopMenuHandler);
 	SetMenuTitle(topmenu2, "Map Top");
 	
-	if (!g_bMapButtons && g_bGlobalDB && g_BGlobalDBConnected && g_hDbGlobal != INVALID_HANDLE && g_bglobalValidFilesize && g_bBhopHackProtection && !g_bBhopPluginEnabled && !g_bAutoTimer && !g_bAutoBhop2)
+	if (!g_bMapButtons && g_bGlobalDB && g_BGlobalDBConnected && g_hDbGlobal != INVALID_HANDLE && g_bglobalValidFilesize && g_bBhopHackProtection && !g_bAutoTimer && !g_bAutoBhop2)
 	{
 		AddMenuItem(topmenu2, "!globaltop", "Top 5 Global Times");
 		AddMenuItem(topmenu2, "!globaltop128", "Top 5 Global Times (128)");
@@ -1837,7 +1852,7 @@ public MapTopMenuHandler(Handle:menu, MenuAction:action, param1,param2)
 {
 	if(action == MenuAction_Select)
 	{
-		if (!g_bMapButtons && g_bGlobalDB && g_BGlobalDBConnected && g_hDbGlobal != INVALID_HANDLE && g_bglobalValidFilesize && g_bBhopHackProtection && !g_bBhopPluginEnabled)
+		if (!g_bMapButtons && g_bGlobalDB && g_BGlobalDBConnected && g_hDbGlobal != INVALID_HANDLE && g_bglobalValidFilesize && g_bBhopHackProtection)
 		{
 			switch(param2)
 			{
@@ -1995,6 +2010,8 @@ public HelpPanel3(client)
 	Format(szTmp, 64, "KZ Timer Help (3/3) - v%s",VERSION);
 	DrawPanelText(panel, szTmp);
 	DrawPanelText(panel, " ");
+	DrawPanelText(panel, "!bhopcheck <name> - bunnyhop check (anticheat)");
+	DrawPanelText(panel, " ");
 	DrawPanelText(panel, "Advice: Deactivate your mouse acceleration");
 	DrawPanelText(panel, "and enable rawinput in your game options");
 	DrawPanelText(panel, " ");
@@ -2037,7 +2054,7 @@ public ShowSrvSettings(client)
 	PrintToConsole(client, "-----------------");
 	PrintToConsole(client, "KZ Timer settings");
 	PrintToConsole(client, "-----------------");
-	PrintToConsole(client, " ");
+	PrintToConsole(client, "kz_anticheat_ban_duration %.1fh", g_fBanDuration);
 	PrintToConsole(client, "kz_auto_bhop %i (bhop_ & surf_ maps)", g_bAutoBhop);
 	PrintToConsole(client, "kz_auto_timer %i", g_bAutoTimer);
 	PrintToConsole(client, "kz_autoheal %i", g_Autohealing_Hp);
@@ -2079,11 +2096,9 @@ public ShowSrvSettings(client)
 	PrintToConsole(client, "kz_restore %b", g_bRestore);
 	PrintToConsole(client, "kz_settings_enforcer %b", g_bEnforcer);
 	PrintToConsole(client, "kz_use_radio %b", g_bRadioCommands);
-	PrintToConsole(client, " ");
 	PrintToConsole(client, "---------------");
 	PrintToConsole(client, "Server settings");
 	PrintToConsole(client, "---------------");
-	PrintToConsole(client, " ");
 	new Handle:hTmp;	
 	hTmp = FindConVar("sv_airaccelerate");
 	new Float: flAA = GetConVarFloat(hTmp);	

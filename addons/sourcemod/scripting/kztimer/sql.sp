@@ -127,6 +127,7 @@ new String:sqlglobal_insertPlayer128[] 				= "INSERT INTO player128 (steamid, ma
 new String:sqlglobal_updatePlayer128[] 				= "UPDATE player128 SET name = '%s', runtime = '%f', teleports = '%i' WHERE steamid = '%s' AND mapname = '%s';";
 new String:sqlglobal_selectFilesize[] 				= "SELECT filesize FROM maplist where mapname = '%s'";
 new String:sqlglobal_insertFilesize[] 				= "INSERT INTO maplist (mapname, filesize) VALUES('%s', '%i');";
+new String:sqlglobal_insertBan[] 					= "INSERT INTO banlist (steamid, player) VALUES('%s', '%s');";
 
 // ADMIN 
 new String:sqlite_dropMap[] 					= "DROP TABLE map; VACCUM";
@@ -145,8 +146,25 @@ new String:sql_resetDropBhopRecord[] 		= "UPDATE playerjumpstats SET dropbhoprec
 new String:sql_resetWJRecord[] 				= "UPDATE playerjumpstats SET wjrecord = '-1.0' WHERE steamid LIKE '%s';";   
 new String:sql_resetLjRecord[] 				= "UPDATE playerjumpstats SET ljrecord = '-1.0' WHERE steamid LIKE '%s';";  
 new String:sql_resetMultiBhopRecord[] 		= "UPDATE playerjumpstats SET multibhoprecord = '-1.0' WHERE steamid LIKE '%s';";  
+new String:sql_resetCheat1[] 					= "DELETE FROM playertimes WHERE steamid LIKE '%s'";
+new String:sql_resetCheat2[] 					= "DELETE FROM playerrank WHERE steamid LIKE '%s'";
+new String:sql_resetCheat3[] 					= "UPDATE playerjumpstats SET bhoprecord = '-1.0', multibhoprecord = '-1.0', ljrecord = '-1.0',wjrecord = '-1.0', dropbhoprecord = '-1.0' WHERE steamid LIKE '%s';"; 
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+public db_DeleteCheater(client, String:steamid[32])
+{
+	decl String:szQuery[255];
+	decl String:szsteamid[32*2+1];
+	SQL_QuoteString(g_hDb, steamid, szsteamid, 32*2+1);      	
+	Format(szQuery, 255, sql_resetCheat1, szsteamid);       
+	SQL_TQuery(g_hDb, SQL_CheckCallback, szQuery,DBPrio_Low);
+	Format(szQuery, 255, sql_resetCheat2, szsteamid);       
+	SQL_TQuery(g_hDb, SQL_CheckCallback, szQuery,DBPrio_Low);	   
+	Format(szQuery, 255, sql_resetCheat3, szsteamid);       
+	SQL_TQuery(g_hDb, SQL_CheckCallback, szQuery,DBPrio_Low);	   	
+}
 
 public db_viewPlayerRank2(client, String:szSteamId[32])
 {
@@ -333,6 +351,13 @@ public dbInsertGlobalMap()
 	decl String:szQuery[256];
 	Format(szQuery, 256, sqlglobal_insertFilesize, g_szMapName,g_unique_FileSize);
 	SQL_TQuery(g_hDbGlobal, sqlglobal_insertFilesizeCallback, szQuery);
+}
+
+public db_InsertBan(String:szSteamId[32], String:szName[64])
+{
+	decl String:szQuery[256];
+	Format(szQuery, 256, sqlglobal_insertBan, szSteamId,szName);
+	SQL_TQuery(g_hDbGlobal, SQL_CheckCallback, szQuery,DBPrio_Low);
 }
 
 public sqlglobal_insertFilesizeCallback(Handle:owner, Handle:hndl, const String:error[], any:data)

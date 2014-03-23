@@ -11,7 +11,7 @@
 #include <geoip>
 #include <colors>
 #undef REQUIRE_EXTENSIONS
-#define VERSION "1.11 Nightly#2"
+#define VERSION "1.11 Nightly#3"
 #define ADMIN_LEVEL ADMFLAG_UNBAN
 #define WHITE 0x01
 #define DARKRED 0x02
@@ -96,6 +96,23 @@ enum VelocityOverride
 	VelocityOvr_InvertReuseVelocity
 }
 
+//macrodox
+new aiJumps[MAXPLAYERS+1] = {0, ...};
+new Float:afAvgJumps[MAXPLAYERS+1] = {1.0, ...};
+new Float:afAvgSpeed[MAXPLAYERS+1] = {250.0, ...};
+new Float:avVEL[MAXPLAYERS+1][3];
+new aiPattern[MAXPLAYERS+1] = {0, ...};
+new aiPatternhits[MAXPLAYERS+1] = {0, ...};
+new Float:avLastPos[MAXPLAYERS+1][3];
+new aiAutojumps[MAXPLAYERS+1] = {0, ...};
+new aaiLastJumps[MAXPLAYERS+1][30];
+new Float:afAvgPerfJumps[MAXPLAYERS+1] = {0.3333, ...};
+new g_miTickCount = 1;
+new aiIgnoreCount[MAXPLAYERS+1];
+new bool:bBanFlagged[MAXPLAYERS+1];
+new bool:bSurfCheck[MAXPLAYERS+1];
+new aiLastPos[MAXPLAYERS+1] = {0, ...};
+
 //global declarations
 new g_i = 0;
 new g_DbType;
@@ -145,6 +162,8 @@ new Handle:g_hdist_pro_multibhop = INVALID_HANDLE;
 new Float:g_dist_pro_multibhop;
 new Handle:g_hdist_leet_multibhop = INVALID_HANDLE;
 new Float:g_dist_leet_multibhop;
+new Handle:g_hBanDuration = INVALID_HANDLE;
+new Float:g_fBanDuration;
 new Handle:g_hdist_good_lj = INVALID_HANDLE;
 new Float:g_dist_good_lj;
 new Handle:g_hdist_pro_lj = INVALID_HANDLE;
@@ -276,6 +295,7 @@ new bool:g_btickrate64;
 new bool:g_bProReplay;
 new bool:g_bTpReplay;
 new bool:g_pr_refreshingDB;
+new bool:g_bBhopHackProtection;
 new bool:g_bCCheckpoints[MAXPLAYERS+1];
 new bool:g_bTopMenuOpen[MAXPLAYERS+1]; 
 new bool:g_bStandUpBhop[MAXPLAYERS+1];
@@ -286,8 +306,6 @@ new bool:g_bRestartCords[MAXPLAYERS+1];
 new bool:g_bPause[MAXPLAYERS+1];
 new bool:g_bOverlay[MAXPLAYERS+1];
 new bool:g_bchallengeConnected[MAXPLAYERS+1]=false;
-new bool:g_bBhopPluginEnabled;
-new bool:g_bBhopHackProtection;
 new bool:g_bDuckInAir[MAXPLAYERS+1];
 new bool:g_bLastButtonJump[MAXPLAYERS+1];
 new bool:g_bPlayerJumped[MAXPLAYERS+1];
@@ -637,6 +655,8 @@ public OnPluginStart()
 	GetConVarString(g_hWelcomeMsg,g_sWelcomeMsg,512);
 	HookConVarChange(g_hWelcomeMsg, OnSettingChanged);
 	
+	g_hBanDuration   = CreateConVar("kz_anticheat_ban_duration", "72.0", "Ban duration (Hours)", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 300.0, true, 400.0);
+	
 	//jump physics depend on tickrate.. therefore different defaults
 	if (g_btickrate64)
 	{
@@ -693,6 +713,9 @@ public OnPluginStart()
 		g_hdist_leet_multibhop   = CreateConVar("kz_dist_leet_multibhop", "340.0", "Minimum distance for multi-bhops to be considered leet [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 200.0, true, 9999.0);		
 	}	
 		
+	g_fBanDuration    = GetConVarFloat(g_hBanDuration);
+	HookConVarChange(g_hBanDuration, OnSettingChanged);	
+	
 	g_fMaxBhopPreSpeed    = GetConVarFloat(g_hMaxBhopPreSpeed);
 	HookConVarChange(g_hMaxBhopPreSpeed, OnSettingChanged);	
 		
@@ -796,6 +819,7 @@ public OnPluginStart()
 	RegConsoleCmd("sm_hide", Client_Hide); 
 	RegConsoleCmd("+noclip", NoClip);
 	RegConsoleCmd("-noclip", UnNoClip);
+	RegConsoleCmd("sm_bhopcheck", Command_Stats);
 	RegAdminCmd("sm_kzadmin", Admin_KzPanel, ADMIN_LEVEL, "Displays the kz admin panel");
 	RegAdminCmd("sm_resettimes", Admin_DropAllMapRecords, ADMIN_LEVEL, "Reset player times (drops table playertimes)");
 	RegAdminCmd("sm_resetranks", Admin_DropPlayerRanks, ADMIN_LEVEL, "Resets the player point system (drops table playerrank)");
@@ -811,6 +835,7 @@ public OnPluginStart()
 	RegAdminCmd("sm_deletetpreplay", Admin_DeleteTpReplay, ADMIN_LEVEL, "Deletes tp replay for a given map");	
 	RegAdminCmd("sm_getmultiplier", Admin_GetMulitplier, ADMIN_LEVEL, "Get dynamic multiplier for given player");
 	RegAdminCmd("sm_setmultiplier", Admin_SetMulitplier, ADMIN_LEVEL, "Set dynamic multiplier for given player and mutliplier value");	
+	
 	RegConsoleCmd("say", Say_Hook);
 	RegConsoleCmd("say_team", Say_Hook);
 	AutoExecConfig(true, "kztimer");
@@ -827,6 +852,7 @@ public OnPluginStart()
 	HookEvent("round_start", Event_OnRoundStart);
 	HookEvent("player_hurt", Event_OnPlayerHurt);
 	HookEvent("player_jump", Event_OnJump);
+	HookEvent("player_jump", Event_OnJumpMacroDox, EventHookMode_Post);
 	HookEvent("player_team", EventTeamChange, EventHookMode_Post);
 	HookEntityOutput("func_button", "OnPressed", ButtonPress);
 	
@@ -908,7 +934,6 @@ public OnMapStart()
 	g_maptimes_tp = 0;
 	g_iBot = -1;
 	g_iBot2 = -1;
-	g_bBhopPluginEnabled = false;
 	g_bBhopHackProtection = false;
 	g_bAutoBhop2=false;
 	
@@ -991,24 +1016,11 @@ public OnMapStart()
 	//AutoBhop?
 	if(StrEqual(g_szMapTag[0],"surf") || StrEqual(g_szMapTag[0],"bhop") || StrEqual(g_szMapTag[0],"mg"))
 		g_bAutoBhop2=true;
+	
+	//cheat protection
+	if((StrEqual(g_szMapTag[0],"kz") || StrEqual(g_szMapTag[0],"xc")) || g_bAutoBhop2 == false)
+		g_bBhopHackProtection=true;
 		
-	
-	new Handle:tmph = FindPluginByFile("macrodox.smx");
-	if (g_bAutoBhop2)
-	{
-		tmph = FindPluginByFile("macrodox.smx");
-			if (tmph != INVALID_HANDLE && GetPluginStatus(tmph) == Plugin_Running) 
-				ServerCommand("sm plugins unload macrodox.smx");
-	}
-	else
-	{	
-		tmph = FindPluginByFile("macrodox.smx");
-		if (tmph != INVALID_HANDLE && GetPluginStatus(tmph) != Plugin_Running) 
-			ServerCommand("sm plugins load macrodox.smx");	
-	
-	}
-	if (tmph != INVALID_HANDLE)
-		CloseHandle(tmph);
 }
 
 public OnConfigsExecuted()
@@ -1204,7 +1216,7 @@ public OnClientPostAdminCheck(client)
 	PrintToConsole(client, "You should set cl_downloadfilter to %call%c to get the required plugin files!", QUOTE,QUOTE);
 	PrintToConsole(client, " ");
 	PrintToConsole(client, "Player commands");
-	PrintToConsole(client, "!help, !menu, !options, !checkpoint, !gocheck, !prev, !next, !undo, !profile, !compare");
+	PrintToConsole(client, "!help, !menu, !options, !checkpoint, !gocheck, !prev, !next, !undo, !profile, !compare !bhopcheck");
 	PrintToConsole(client, "!top, !start, !stop, , !pause, !usp, !challenge, !surrender, !goto, !spec, !showsettings");
 	PrintToConsole(client, "(options menu contains: !adv, !info, !colorchat, !cpmessage, !sound, !menusound");
 	PrintToConsole(client, "!hide, !hidespecs, !showtime, !disablegoto, !shownames, !sync, !bhop, !ice)");
@@ -1288,6 +1300,24 @@ public OnClientDisconnect(client)
 	//DB: Delete invalid playertimes for this map (just to keep the db clear)
 	Format(szQuery, 1024, sql_deletePlayer, szSteamId, g_szMapName);
 	SQL_TQuery(g_hDb,sql_deletePlayerCheckCallback,szQuery,DBPrio_Low);
+	
+	//MACRODOX
+	aiJumps[client] = 0;
+	afAvgJumps[client] = 5.0;
+	afAvgSpeed[client] = 250.0;
+	afAvgPerfJumps[client] = 0.3333;
+	aiPattern[client] = 0;
+	aiPatternhits[client] = 0;
+	aiAutojumps[client] = 0;
+	aiIgnoreCount[client] = 0;
+	bBanFlagged[client] = false;
+	avVEL[client][2] = 0.0;
+	new i;
+	while (i < 30)
+	{
+		aaiLastJumps[client][i] = 0;
+		i++;
+	}	
 }
 
 public OnSettingChanged(Handle:convar, const String:oldValue[], const String:newValue[])
@@ -1506,31 +1536,18 @@ public OnSettingChanged(Handle:convar, const String:oldValue[], const String:new
 	{
 		if(newValue[0] == '1')		
 		{		
-			g_bAutoBhop = true;
-			
+			g_bAutoBhop = true;		
 			if(StrEqual(g_szMapTag[0],"surf") || StrEqual(g_szMapTag[0],"bhop") || StrEqual(g_szMapTag[0],"mg"))
 			{
-				g_bAutoBhop2=true;
-				new Handle:tmp = FindPluginByFile("macrodox.smx");
-				tmp = FindPluginByFile("macrodox.smx");
-				if (tmp != INVALID_HANDLE && GetPluginStatus(tmp) == Plugin_Running) 
-					ServerCommand("sm plugins unload macrodox.smx");
-				if (tmp != INVALID_HANDLE)
-					CloseHandle(tmp);
+				g_bBhopHackProtection	= false;
+				g_bAutoBhop2 = true;
 			}
-			else
-				g_bAutoBhop2=false;
 		}
 		else
 		{
 			g_bAutoBhop = false;
 			g_bAutoBhop2 = false;
-			new Handle:tmp = FindPluginByFile("macrodox.smx");
-			tmp = FindPluginByFile("macrodox.smx");
-			if (tmp != INVALID_HANDLE && GetPluginStatus(tmp) != Plugin_Running) 
-				ServerCommand("sm plugins load macrodox.smx");	
-			if (tmp != INVALID_HANDLE)
-				CloseHandle(tmp);
+			g_bBhopHackProtection = true;
 		}
 	}		
 		
@@ -1604,6 +1621,9 @@ public OnSettingChanged(Handle:convar, const String:oldValue[], const String:new
 	if(convar == g_hdist_leet_lj)
 		g_dist_leet_lj = StringToFloat(newValue[0]);
 	
+	if(convar == g_hBanDuration)
+		g_fBanDuration = StringToFloat(newValue[0]);
+		
 	if(convar == g_hBhopSpeedCap)
 		g_fBhopSpeedCap = StringToFloat(newValue[0]);	
 	if(convar == g_hPlayerpointsScale)
@@ -1686,4 +1706,26 @@ public OnSettingChanged(Handle:convar, const String:oldValue[], const String:new
 	
 	if(convar == g_hWelcomeMsg)
 		Format(g_sWelcomeMsg,512,"%s", newValue[0]);
+}
+
+//MACRODOX BHOP PROTECTION
+//https://forums.alliedmods.net/showthread.php?p=1678026
+public OnGameFrame()
+{
+    if (g_miTickCount > 1*MaxClients)
+        g_miTickCount = 1;
+    else
+    {
+        if (g_miTickCount % 1 == 0)
+        {
+            new index = g_miTickCount / 1;
+            if (bSurfCheck[index] && IsClientInGame(index) && IsPlayerAlive(index))
+            {	
+                GetEntPropVector(index, Prop_Data, "m_vecVelocity", avVEL[index]);
+                if (avVEL[index][2] < -290)
+                    aiIgnoreCount[index] = 2;             
+            }
+        }
+        g_miTickCount++;
+    }
 }

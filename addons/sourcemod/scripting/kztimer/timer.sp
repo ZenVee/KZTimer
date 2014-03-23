@@ -708,10 +708,12 @@ public Action:OnPlayerConnectTimer(Handle:timer, any:client)
 {
 	if (IsClientInGame(client) && !IsFakeClient(client))
 	{
+		if (g_bBhopHackProtection)
+			PrintToChat(client, "%t", "AntiCheatEnabled", MOSSGREEN,WHITE,LIMEGREEN);
 		if (g_bEnforcer)
 			PrintToChat(client, "%t", "SettingsEnforcerEnabled", MOSSGREEN,WHITE,LIMEGREEN);
 		else
-		PrintToChat(client, "%t", "SettingsEnforcerDisabled", MOSSGREEN,WHITE);	
+			PrintToChat(client, "%t", "SettingsEnforcerDisabled", MOSSGREEN,WHITE,GRAY);	
 			
 		//display map records
 		PrintMapRecords(client);

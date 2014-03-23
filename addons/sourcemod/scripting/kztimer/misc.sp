@@ -770,7 +770,7 @@ public PlayerPanel(client)
 		new String:szTmp[255];
 		new Handle:panel = CreatePanel();				
 		if(!StrEqual(g_szPlayerPanelText[client],""))
-			Format(szTmp, 255, "%s\nSpeed: f%.1f u/s",g_szPlayerPanelText[client],GetSpeed(client));
+			Format(szTmp, 255, "%s\nSpeed: %.1f u/s",g_szPlayerPanelText[client],GetSpeed(client));
 		else
 			Format(szTmp, 255, "Speed: %.1f u/s",GetSpeed(client));
 		
@@ -846,4 +846,92 @@ public PlayQuakeSound_Spec(client, String:buffer[255])
 			}					
 		}		
 	}
+}
+
+public PerformBan(client)
+{
+	if (IsValidEntity(client) && IsClientInGame(client))
+	{
+		decl String:szSteamID[32];
+		decl String:szName[64];
+		GetClientAuthString(client,szSteamID,32);
+		GetClientName(client,szName,64);
+		if (g_hDbGlobal != INVALID_HANDLE)
+			db_InsertBan(szSteamID, szName);
+		new bantime= RoundToZero(g_fBanDuration*60);
+		decl String:banmsg[255];
+		Format(banmsg, sizeof(banmsg), "KZ AntiCheat: You were banned for using cheats (%.0fh)",g_fBanDuration); 
+		BanClient(client, bantime, BANFLAG_AUTO, banmsg, banmsg);
+		db_DeleteCheater(client,szSteamID);
+	}
+}
+
+public GiveUsp(client)
+{
+	if(!IsPlayerAlive(client) || GetClientTeam(client) == 1)
+		return;		
+	g_UspDrops[client]++;
+	GivePlayerItem(client, "weapon_usp_silencer");
+	if (!g_bPreStrafe)
+		PrintToChat(client, "%t", "Usp1", MOSSGREEN,WHITE);
+	PrintToChat(client, "%t", "Usp2", MOSSGREEN,WHITE);
+}
+							
+//MACRODOX BHOP PROTECTION
+//https://forums.alliedmods.net/showthread.php?p=1678026
+public PerformStats(client, target)
+{
+	new String:banstats[256];
+	GetClientStats(target, banstats, sizeof(banstats));
+	PrintToChat(client, "[%cKZ%c] %s",MOSSGREEN,WHITE,banstats);
+	PrintToConsole(client, "[KZ] %s",banstats);
+}
+
+//MACRODOX BHOP PROTECTION
+//https://forums.alliedmods.net/showthread.php?p=1678026
+public GetClientStats(client, String:string[], length)
+{
+	new String:map[128];
+	new String:szName[64];
+	GetClientName(client,szName,64);
+	GetCurrentMap(map, 128);
+	Format(string, length, "%cPlayer%c: %s - %cAvg speed%c: %.2f - %cLast jumps%c: %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",
+	LIMEGREEN,
+	WHITE,
+	szName,
+	LIMEGREEN,
+	WHITE,
+    afAvgSpeed[client],
+	LIMEGREEN,
+	WHITE,
+    aaiLastJumps[client][0],
+    aaiLastJumps[client][1],
+    aaiLastJumps[client][2],
+    aaiLastJumps[client][3],
+    aaiLastJumps[client][4],
+    aaiLastJumps[client][5],
+    aaiLastJumps[client][6],
+    aaiLastJumps[client][7],
+    aaiLastJumps[client][8],
+    aaiLastJumps[client][9],
+    aaiLastJumps[client][10],
+    aaiLastJumps[client][11],
+    aaiLastJumps[client][12],
+    aaiLastJumps[client][13],
+    aaiLastJumps[client][14],
+    aaiLastJumps[client][15],
+    aaiLastJumps[client][16],
+    aaiLastJumps[client][17],
+    aaiLastJumps[client][18],
+    aaiLastJumps[client][19],
+    aaiLastJumps[client][20],
+    aaiLastJumps[client][21],
+    aaiLastJumps[client][22],
+    aaiLastJumps[client][23],
+    aaiLastJumps[client][24],
+    aaiLastJumps[client][25],
+    aaiLastJumps[client][26],
+    aaiLastJumps[client][27],
+    aaiLastJumps[client][28],
+    aaiLastJumps[client][29]);
 }

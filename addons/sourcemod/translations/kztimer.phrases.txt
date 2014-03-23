@@ -10,6 +10,11 @@
 		"#format"   "{1:c},{2:c}"
 		"en"       "[{1}KZ{2}] Jump penalty forced. (server-sided)"
 	}
+	"AntiCheatEnabled"
+	{
+		"#format"   "{1:c},{2:c},{3:c}"
+		"en"       "[{1}KZ{2}] {3}AntiCheat enabled."
+	}	
 	"NoCpsDuringChallenge"
 	{
 		"#format"   "{1:c},{2:c}"
@@ -452,12 +457,12 @@
 	"SettingsEnforcerEnabled"
 	{
 		"#format"   "{1:c},{2:c},{3:c}"
-		"en"        "[{1}KZ{2}] {3}Server settings enforcer enabled."
+		"en"        "[{1}KZ{2}] {3}Settings Enforcer enabled."
 	}
 	"SettingsEnforcerDisabled"
 	{
-		"#format"   "{1:c},{2:c}"
-		"en"        "[{1}KZ{2}] Server settings enforcer disabled."
+		"#format"   "{1:c},{2:c},{3:c}"
+		"en"        "[{1}KZ{2}] {3}Settings Enforcer disabled."
 	}
 	"PositionRestored"
 	{

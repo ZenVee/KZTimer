@@ -285,7 +285,7 @@ public CL_OnEndTimerPress(client)
 	}
 	
 	//NEW GLOBAL RECORD 
-	if (!g_bMapButtons && g_bBhopHackProtection && g_bglobalValidFilesize && g_BGlobalDBConnected && g_hDbGlobal != INVALID_HANDLE && g_bEnforcer && !g_bBhopPluginEnabled && !g_bAutoBhopWasActive[client]) 
+	if (!g_bMapButtons && g_bBhopHackProtection && g_bglobalValidFilesize && g_BGlobalDBConnected && g_hDbGlobal != INVALID_HANDLE && g_bEnforcer && !g_bAutoBhopWasActive[client]) 
 	{
 		if (g_btickrate64 && g_fFinalTime[client] < g_fRecordTimeGlobal)
 		{
@@ -404,32 +404,29 @@ public CL_OnEndTimerPress(client)
 	}
 	
 	//global db update
-	if (!g_bMapButtons && g_bGlobalDB && g_BGlobalDBConnected && g_hDbGlobal != INVALID_HANDLE && g_bEnforcer && !g_bBhopPluginEnabled && g_bBhopHackProtection && g_bglobalValidFilesize && !g_bAutoTimer && !g_bAutoBhopWasActive[client])	
+	if (!g_bMapButtons && g_bGlobalDB && g_BGlobalDBConnected && g_hDbGlobal != INVALID_HANDLE && g_bEnforcer && g_bBhopHackProtection && g_bglobalValidFilesize && !g_bAutoTimer && !g_bAutoBhopWasActive[client])	
 		db_GlobalRecord(client);
 	else
 	{
 		if (g_hDbGlobal == INVALID_HANDLE || !g_BGlobalDBConnected)
-			PrintToConsole(client, "[KZ] Global Record disabled. Reason: No connection to the global database");
+			PrintToConsole(client, "[KZ] Global Records disabled. Reason: No connection to the global database.");
 		else
 			if (g_bMapButtons)
-				PrintToConsole(client, "[KZ] Global Record disabled. Reason: Self-provided start or stop button");
+				PrintToConsole(client, "[KZ] Global Records disabled. Reason: Only maps with integrated climb buttons are supported.");
 			else
 				if (!g_bEnforcer)
-					PrintToConsole(client, "[KZ] Global Record disabled. Reason: Server settings enforcer disabled!");
+					PrintToConsole(client, "[KZ] Global Records disabled. Reason: Server settings enforcer disabled.");
 				else
-					if (g_bBhopPluginEnabled)
-						PrintToConsole(client, "[KZ] Global Record disabled. Reason: Auto-bhop plugin detected");
+					if (!g_bglobalValidFilesize)
+						PrintToConsole(client, "[KZ] Global Records disabled. Reason: Wrong .bsp file size. (other version registered in the global database. please contact an admin)");	
 					else
-						if (!g_bglobalValidFilesize)
-							PrintToConsole(client, "[KZ] Global Record disabled. Reason: Wrong .bsp file size (other version registered in the global db. please contact an admin)");	
+						if (!g_bBhopHackProtection)
+							PrintToConsole(client, "[KZ] Global Records disabled. Reason: KZ AntiCheat disabled.");
 						else
-							if (!g_bBhopHackProtection)
-								PrintToConsole(client, "[KZ] Global Record disabled. Reason: Macrodox (bhop cheat detection) not running");
+							if (g_bAutoTimer)
+								PrintToConsole(client, "[KZ] Global Records disabled. Reason: kz_auto_timer enabled.");
 							else
-								if (g_bAutoTimer)
-									PrintToConsole(client, "[KZ] Global Record disabled. Reason: kz_auto_timer is active");
-								else
-									if (g_bAutoBhopWasActive[client])
-										PrintToConsole(client, "[KZ] Global Record disabled. Reason: kz_auto_bhop was active during your run");								
+								if (g_bAutoBhopWasActive[client])
+									PrintToConsole(client, "[KZ] Global Records disabled. Reason: kz_auto_bhop was enabled during your run.");								
 	}
 }
