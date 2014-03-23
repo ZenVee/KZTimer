@@ -252,7 +252,7 @@ public Action:Client_Accept(client, args)
 				g_bChallengeRequest[i]=false;
 				g_bChallenge[i]=true;
 				g_bChallenge[client]=true;
-				g_bChallengeAbort[i]=false;
+				g_bChallengeAbort[client]=false;
 				g_bChallengeAbort[i]=false;
 				g_CBet[client] = g_CBet[i];
 				g_bCCheckpoints[client] = g_bCCheckpoints[i];
@@ -285,7 +285,22 @@ public Action:Client_Accept(client, args)
 				new r4 = GetRandomInt(0, 255);
 				SetEntityRenderColor(i, r1, r2, r3, r4);
 				SetEntityRenderColor(client, r1, r2, r3, r4);
-				
+				g_bTimeractivated[client] = false;
+				g_bTimeractivated[i] = false;
+				g_fPlayerCordsUndoTp[i][0] = 0.0;
+				g_fPlayerCordsUndoTp[i][1] = 0.0;
+				g_fPlayerCordsUndoTp[i][2] = 0.0;		
+				g_CurrentCp[i] = -1;
+				g_CounterCp[i] = 0;	
+				g_OverallCp[i] = 0;
+				g_OverallTp[i] = 0;
+				g_fPlayerCordsUndoTp[client][0] = 0.0;
+				g_fPlayerCordsUndoTp[client][1] = 0.0;
+				g_fPlayerCordsUndoTp[client][2] = 0.0;		
+				g_CurrentCp[client] = -1;
+				g_CounterCp[client] = 0;	
+				g_OverallCp[client] = 0;
+				g_OverallTp[client] = 0;
 				CreateTimer(1.0, CheckChallenge, i, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 				CreateTimer(1.0, CheckChallenge, client, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 			}

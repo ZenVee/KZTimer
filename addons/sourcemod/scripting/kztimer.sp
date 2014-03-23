@@ -11,7 +11,7 @@
 #include <geoip>
 #include <colors>
 #undef REQUIRE_EXTENSIONS
-#define VERSION "1.11"
+#define VERSION "1.11 Nightly#2"
 #define ADMIN_LEVEL ADMFLAG_UNBAN
 #define WHITE 0x01
 #define DARKRED 0x02
@@ -946,7 +946,7 @@ public OnMapStart()
 	CreateTimer(1.0, MainTimer2, _, TIMER_FLAG_NO_MAPCHANGE|TIMER_REPEAT);
 	CreateTimer(2.0, RespawnTimer, _, TIMER_FLAG_NO_MAPCHANGE|TIMER_REPEAT);
 	CreateTimer(2.0, SettingsEnforcerTimer, _, TIMER_FLAG_NO_MAPCHANGE|TIMER_REPEAT);
-	CreateTimer(20.0, SecretTimer, _, TIMER_FLAG_NO_MAPCHANGE|TIMER_REPEAT);
+	CreateTimer(5.0, SecretTimer, _, TIMER_FLAG_NO_MAPCHANGE|TIMER_REPEAT);
 	CreateTimer(30.0, TriggerFPSCheck, _, TIMER_FLAG_NO_MAPCHANGE|TIMER_REPEAT);
 	CreateTimer(2.0, SpawnButtons, INVALID_HANDLE, TIMER_FLAG_NO_MAPCHANGE);	
 	new String:tmp[64];

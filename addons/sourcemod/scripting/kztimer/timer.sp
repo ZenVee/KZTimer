@@ -169,6 +169,7 @@ public Action:Timer_Countdown(Handle:timer, any:client)
 			PrintToChat(client, "%t", "ChallengeStarted3",RED,WHITE,YELLOW);
 			PrintToChat(client, "%t", "ChallengeStarted4",RED,WHITE,YELLOW);
 			KillTimer(timer);
+			return Plugin_Handled;
 		}
 	}
 	else
@@ -247,6 +248,7 @@ public Action:CheckChallenge(Handle:timer, any:client)
 			CalculatePlayerRank(client);
 			
 			KillTimer(timer);
+			return Plugin_Handled;
 		}
 	}
 	else
