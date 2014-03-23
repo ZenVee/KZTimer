@@ -717,15 +717,20 @@ public Action:OnPlayerConnectTimer(Handle:timer, any:client)
 		PrintMapRecords(client);
 
 		if (g_bRestoreCMsg[client])
-			PrintToChat(client, "%t", "PositionRestored", MOSSGREEN,WHITE,GRAY);
-		g_bRestoreCMsg[client]=false;
+		{
+			CreateTimer(3.5, OverlayTimer, client,TIMER_FLAG_NO_MAPCHANGE);
+			g_bOverlay[client]=true;
+			PrintHintText(client,"%t", "PositionRestored");
+		}
 		
-		if (!g_bAutoTimer && IsPlayerAlive(client))
+		if (!g_bAutoTimer && IsPlayerAlive(client) && !g_bRestoreCMsg[client])
 		{
 			CreateTimer(3.5, OverlayTimer, client,TIMER_FLAG_NO_MAPCHANGE);
 			g_bOverlay[client]=true;
 			PrintHintText(client,"%t", "TimerStartReminder");
 		}
+		g_bRestoreCMsg[client]=false;
+		
 		if (g_bAllowCheckpoints)
 			if(StrEqual(g_szMapTag[0],"kz") || StrEqual(g_szMapTag[0],"xc"))
 				Client_Kzmenu(client,0);

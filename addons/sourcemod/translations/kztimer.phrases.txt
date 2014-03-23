@@ -461,8 +461,8 @@
 	}
 	"PositionRestored"
 	{
-		"#format"   "{1:c},{2:c},{3:c}"
-		"en"        "[{1}KZ{2}] {3}Time and position restored. (no checkpoints)"
+		"#format"   ""
+		"en"        " \n   Time and position restored\n            (no checkpoints)"
 	}
 	"RadioCommandsDisabled"
 	{
