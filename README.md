@@ -12,3 +12,7 @@ Changelog (>1.1 stable)
 - added player option jump penalty
 - added server cvar kz_force_jump_penalty
 - fixed undo abuse during a challenge
+- integrated macrodox bhop anti cheat (instant ban)
+- auto-removing of records from banned players
+- added kz_anticheat_ban_duration (hours)
+- added !bhopcheck <name>
