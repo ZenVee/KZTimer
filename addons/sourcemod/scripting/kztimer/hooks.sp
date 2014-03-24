@@ -2,7 +2,7 @@
 public Action:Event_OnPlayerSpawn(Handle:event, const String:name[], bool:dontBroadcast)
 {
 	new client = GetClientOfUserId(GetEventInt(event, "userid"));
-	if(client != 0 && (GetClientTeam(client) > 1))
+	if(client != 0)
 	{	
 		g_bTouchWall[client] = false;
 		g_fStartCommandUsed_LastTime[client] = GetEngineTime();
@@ -11,7 +11,7 @@ public Action:Event_OnPlayerSpawn(Handle:event, const String:name[], bool:dontBr
 		g_bOnGround[client] = true;
 		
 		//remove weapons
-		if (g_bCleanWeapons)
+		if (g_bCleanWeapons && (GetClientTeam(client) > 1))
 			StripWeapons(client);
 			
 		//godmode
@@ -45,7 +45,7 @@ public Action:Event_OnPlayerSpawn(Handle:event, const String:name[], bool:dontBr
 			QueryClientConVar(client, "fps_max", ConVarQueryFinished:FPSCheck, client);		
 		
 		//player skin
-		if (g_bPlayerSkinChange)
+		if (g_bPlayerSkinChange && (GetClientTeam(client) > 1))
 		{
 			SetEntPropString(client, Prop_Send, "m_szArmsModel", g_sArmModel);
 			SetEntityModel(client,  g_sPlayerModel);
@@ -55,7 +55,7 @@ public Action:Event_OnPlayerSpawn(Handle:event, const String:name[], bool:dontBr
 		if (g_bFirstSpawn[client])		
 		{
 			StartRecording(client);
-			CreateTimer(0.25, OnPlayerConnectTimer, client,TIMER_FLAG_NO_MAPCHANGE);
+			CreateTimer(0.15, OnPlayerConnectTimer, client,TIMER_FLAG_NO_MAPCHANGE);
 			CreateTimer(5.0, WelcomeMsgTimer, client,TIMER_FLAG_NO_MAPCHANGE);
 			CreateTimer(60.0, HelpMsgTimer, client,TIMER_FLAG_NO_MAPCHANGE);
 			CreateTimer(300.0, ChallengeMsgTimer, client,TIMER_FLAG_NO_MAPCHANGE);		
@@ -63,24 +63,27 @@ public Action:Event_OnPlayerSpawn(Handle:event, const String:name[], bool:dontBr
 		}
 
 		//get start pos for challenge
-		GetClientAbsOrigin(client, g_fCStartPosition[client]);
+		if (GetClientTeam(client) > 1)
+			GetClientAbsOrigin(client, g_fCStartPosition[client]);
 		
 		//restore position (before spec or last session)
-		if (g_bRestoreC[client])
+		if ((GetClientTeam(client) > 1))
 		{
-			TeleportEntity(client, g_fPlayerCordsRestore[client],g_fPlayerAnglesRestore[client],NULL_VECTOR);
-			g_bRestoreC[client]  = false;
-		}
-		else
-			if (g_bRespawnPosition[client])
+			if (g_bRestoreC[client])
 			{
 				TeleportEntity(client, g_fPlayerCordsRestore[client],g_fPlayerAnglesRestore[client],NULL_VECTOR);
-				g_bRespawnPosition[client] = false;
-			}		
+				g_bRestoreC[client]  = false;
+			}
 			else
-				if (g_bAutoTimer)
-					CL_OnStartTimerPress(client);
-		
+				if (g_bRespawnPosition[client])
+				{
+					TeleportEntity(client, g_fPlayerCordsRestore[client],g_fPlayerAnglesRestore[client],NULL_VECTOR);
+					g_bRespawnPosition[client] = false;
+				}		
+				else
+					if (g_bAutoTimer)
+						CL_OnStartTimerPress(client);
+		}
 		//hide radar
 		CreateTimer(0.0, HideRadar, client,TIMER_FLAG_NO_MAPCHANGE);
 		
@@ -90,7 +93,7 @@ public Action:Event_OnPlayerSpawn(Handle:event, const String:name[], bool:dontBr
 		//set speclist
 		Format(g_szPlayerPanelText[client], 512, "");		
 
-		if (g_bClimbersMenuOpen2[client])
+		if (g_bClimbersMenuOpen2[client] && (GetClientTeam(client) > 1))
 		{
 			g_bClimbersMenuOpen2[client] = false;
 			ClimbersMenu(client);
