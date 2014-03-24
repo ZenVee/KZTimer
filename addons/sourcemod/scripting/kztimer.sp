@@ -11,7 +11,7 @@
 #include <geoip>
 #include <colors>
 #undef REQUIRE_EXTENSIONS
-#define VERSION "1.11 Nightly#3"
+#define VERSION "1.11 Nightly #5"
 #define ADMIN_LEVEL ADMFLAG_UNBAN
 #define WHITE 0x01
 #define DARKRED 0x02
@@ -339,6 +339,7 @@ new bool:g_CMOpen[MAXPLAYERS+1];
 new bool:g_bTouchWall[MAXPLAYERS+1];
 new bool:g_brc_PlayerRank[MAXPLAYERS+1];
 new bool:g_bAutoBhopWasActive[MAXPLAYERS+1];
+new bool:g_bLadderJump[MAXPLAYERS+1]; 
 new bool:g_bColorChat[MAXPLAYERS+1]=true;
 new bool:g_BGlobalDBConnected=false;
 new bool:g_bInfoPanel[MAXPLAYERS+1]=false;

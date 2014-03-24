@@ -69,7 +69,7 @@ new String:sql_selectLastRun[] 					= "SELECT cords1,cords2,cords3, angle1, angl
 new String:sql_selectPlayerTmp[] 					= "SELECT steamid, mapname FROM playertmp WHERE steamid = '%s';";
 
 //TABLE JUMMPSTATS
-new String:sql_createPlayerjumpstats[] 			= "CREATE TABLE IF NOT EXISTS playerjumpstats2 (steamid VARCHAR(32), name VARCHAR(32), multibhoprecord FLOAT NOT NULL DEFAULT '-1.0',  multibhoppre FLOAT NOT NULL DEFAULT '-1.0', multibhopmax FLOAT NOT NULL DEFAULT '-1.0', multibhopstrafes INT(12),multibhopcount INT(12),multibhopsync INT(12), multibhopheight FLOAT NOT NULL DEFAULT '-1.0', bhoprecord FLOAT NOT NULL DEFAULT '-1.0',  bhoppre FLOAT NOT NULL DEFAULT '-1.0', bhopmax FLOAT NOT NULL DEFAULT '-1.0', bhopstrafes INT(12),bhopsync INT(12), bhopheight FLOAT NOT NULL DEFAULT '-1.0', ljrecord FLOAT NOT NULL DEFAULT '-1.0', ljpre FLOAT NOT NULL DEFAULT '-1.0', ljmax FLOAT NOT NULL DEFAULT '-1.0', ljstrafes INT(12),ljsync INT(12), ljheight FLOAT NOT NULL DEFAULT '-1.0', dropbhoprecord FLOAT NOT NULL DEFAULT '-1.0',  dropbhoppre FLOAT NOT NULL DEFAULT '-1.0', dropbhopmax FLOAT NOT NULL DEFAULT '-1.0', dropbhopstrafes INT(12),dropbhopsync INT(12), dropbhopheight FLOAT NOT NULL DEFAULT '-1.0', wjrecord FLOAT NOT NULL DEFAULT '-1.0', wjpre FLOAT NOT NULL DEFAULT '-1.0', wjmax FLOAT NOT NULL DEFAULT '-1.0', wjstrafes INT(12),wjsync INT(12), wjheight FLOAT NOT NULL DEFAULT '-1.0', PRIMARY KEY(steamid));";
+new String:sql_createPlayerjumpstats[] 			= "CREATE TABLE IF NOT EXISTS playerjumpstats2 (steamid VARCHAR(32), name VARCHAR(32), multibhoprecord FLOAT NOT NULL DEFAULT '-1.0',  multibhoppre FLOAT NOT NULL DEFAULT '-1.0', multibhopmax FLOAT NOT NULL DEFAULT '-1.0', multibhopstrafes INT(12),multibhopcount INT(12),multibhopsync INT(12), multibhopheight FLOAT NOT NULL DEFAULT '-1.0', bhoprecord FLOAT NOT NULL DEFAULT '-1.0',  bhoppre FLOAT NOT NULL DEFAULT '-1.0', bhopmax FLOAT NOT NULL DEFAULT '-1.0', bhopstrafes INT(12),bhopsync INT(12), bhopheight FLOAT NOT NULL DEFAULT '-1.0', ljrecord FLOAT NOT NULL DEFAULT '-1.0', ljpre FLOAT NOT NULL DEFAULT '-1.0', ljmax FLOAT NOT NULL DEFAULT '-1.0', ljstrafes INT(12),ljsync INT(12), ljheight FLOAT NOT NULL DEFAULT '-1.0', dropbhoprecord FLOAT NOT NULL DEFAULT '-1.0',  dropbhoppre FLOAT NOT NULL DEFAULT '-1.0', dropbhopmax FLOAT NOT NULL DEFAULT '-1.0', dropbhopstrafes INT(12),dropbhopsync INT(12), dropbhopheight FLOAT NOT NULL DEFAULT '-1.0', wjrecord FLOAT NOT NULL DEFAULT '-1.0', wjpre FLOAT NOT NULL DEFAULT '-1.0', wjmax FLOAT NOT NULL DEFAULT '-1.0', wjstrafes INT(12),wjsync INT(12), wjheight FLOAT NOT NULL DEFAULT '-1.0', standupbhoprecord FLOAT NOT NULL DEFAULT '-1.0',  standupbhoppre FLOAT NOT NULL DEFAULT '-1.0', standupbhopmax FLOAT NOT NULL DEFAULT '-1.0', standupbhopstrafes INT(12),standupbhopcount INT(12),standupbhopsync INT(12), standupbhopheight FLOAT NOT NULL DEFAULT '-1.0', dropstandupbhoprecord FLOAT NOT NULL DEFAULT '-1.0',  dropstandupbhoppre FLOAT NOT NULL DEFAULT '-1.0', dropstandupbhopmax FLOAT NOT NULL DEFAULT '-1.0', dropstandupbhopstrafes INT(12), dropstandupbhopcount INT(12), dropstandupbhopsync INT(12), dropstandupbhopheight FLOAT NOT NULL DEFAULT '-1.0', ladderjumprecord FLOAT NOT NULL DEFAULT '-1.0',  ladderjumppre FLOAT NOT NULL DEFAULT '-1.0', ladderjumpmax FLOAT NOT NULL DEFAULT '-1.0', ladderjumpstrafes INT(12), ladderjumpcount INT(12), ladderjumpsync INT(12), ladderjumpheight FLOAT NOT NULL DEFAULT '-1.0', ladderbhoprecord FLOAT NOT NULL DEFAULT '-1.0',  ladderbhoppre FLOAT NOT NULL DEFAULT '-1.0', ladderbhopmax FLOAT NOT NULL DEFAULT '-1.0', ladderbhopstrafes INT(12), ladderbhopcount INT(12), ladderbhopsync INT(12), ladderbhopheight FLOAT NOT NULL DEFAULT '-1.0',  PRIMARY KEY(steamid));";
 new String:sql_insertPlayerJumpBhop[] 			= "INSERT INTO playerjumpstats2 (steamid, name, bhoprecord, bhoppre, bhopmax, bhopstrafes, bhopsync, bhopheight) VALUES('%s', '%s', '%f', '%f', '%f', '%i', '%i', '%f');";
 new String:sql_insertPlayerJumpLj[] 				= "INSERT INTO playerjumpstats2 (steamid, name, ljrecord, ljpre, ljmax, ljstrafes, ljsync, ljheight) VALUES('%s', '%s', '%f', '%f', '%f', '%i', '%i', '%f');";
 new String:sql_insertPlayerJumpMultiBhop[] 	= "INSERT INTO playerjumpstats2 (steamid, name, multibhoprecord, multibhoppre, multibhopmax, multibhopstrafes, multibhopcount, multibhopsync, multibhopheight) VALUES('%s', '%s', '%f', '%f', '%f', '%i', '%i', '%i', '%f');";
@@ -2592,7 +2592,7 @@ public SQL_UpdateLjRecordCallback(Handle:owner, Handle:hndl, const String:error[
 	new client = data;
 	if (IsClientConnected(client))
 	{
-		decl String:szQuery[255];
+		decl String:szQuery[512];
 		decl String:szUName[MAX_NAME_LENGTH];
 		GetClientName(client, szUName, MAX_NAME_LENGTH);
 		decl String:szSteamId[32];
@@ -2601,12 +2601,12 @@ public SQL_UpdateLjRecordCallback(Handle:owner, Handle:hndl, const String:error[
 		SQL_QuoteString(g_hDb, szUName, szName, MAX_NAME_LENGTH*2+1);
 		if(SQL_HasResultSet(hndl) && SQL_FetchRow(hndl))
 		{
-			Format(szQuery, 255, sql_updateLj, szName, g_fPersonalLjRecord[client], g_fPreStrafe[client], g_fMaxSpeed2[client], g_Strafes[client],g_sync[client],g_flastHeight[client], szSteamId);
+			Format(szQuery, 512, sql_updateLj, szName, g_fPersonalLjRecord[client], g_fPreStrafe[client], g_fMaxSpeed2[client], g_Strafes[client],g_sync[client],g_flastHeight[client], szSteamId);
 			SQL_TQuery(g_hDb, SQL_CheckCallback, szQuery,DBPrio_Low);
 		}	
 		else
 		{
-			Format(szQuery, 255, sql_insertPlayerJumpLj, szSteamId, szName, g_fPersonalLjRecord[client], g_fPreStrafe[client], g_fMaxSpeed2[client], g_Strafes[client],g_sync[client],g_flastHeight[client]);
+			Format(szQuery, 512, sql_insertPlayerJumpLj, szSteamId, szName, g_fPersonalLjRecord[client], g_fPreStrafe[client], g_fMaxSpeed2[client], g_Strafes[client],g_sync[client],g_flastHeight[client]);
 			SQL_TQuery(g_hDb, SQL_CheckCallback, szQuery,DBPrio_Low);
 		}
 		db_viewLjRecord2(client);
@@ -2618,7 +2618,7 @@ public SQL_UpdateWjRecordCallback(Handle:owner, Handle:hndl, const String:error[
 	new client = data;
 	if (IsClientInGame(client))
 	{
-		decl String:szQuery[255];
+		decl String:szQuery[512];
 		decl String:szUName[MAX_NAME_LENGTH];
 		GetClientName(client, szUName, MAX_NAME_LENGTH);
 		decl String:szSteamId[32];
@@ -2627,12 +2627,12 @@ public SQL_UpdateWjRecordCallback(Handle:owner, Handle:hndl, const String:error[
 		SQL_QuoteString(g_hDb, szUName, szName, MAX_NAME_LENGTH*2+1);
 		if(SQL_HasResultSet(hndl) && SQL_FetchRow(hndl))
 		{
-			Format(szQuery, 255, sql_updateWJ, szName, g_fPersonalWjRecord[client], g_fPreStrafe[client], g_fMaxSpeed2[client], g_Strafes[client],g_sync[client],g_flastHeight[client], szSteamId);
+			Format(szQuery, 512, sql_updateWJ, szName, g_fPersonalWjRecord[client], g_fPreStrafe[client], g_fMaxSpeed2[client], g_Strafes[client],g_sync[client],g_flastHeight[client], szSteamId);
 			SQL_TQuery(g_hDb, SQL_CheckCallback, szQuery,DBPrio_Low);
 		}	
 		else
 		{
-			Format(szQuery, 255, sql_insertPlayerJumpWJ, szSteamId, szName, g_fPersonalWjRecord[client], g_fPreStrafe[client], g_fMaxSpeed2[client], g_Strafes[client],g_sync[client],g_flastHeight[client]);
+			Format(szQuery, 512, sql_insertPlayerJumpWJ, szSteamId, szName, g_fPersonalWjRecord[client], g_fPreStrafe[client], g_fMaxSpeed2[client], g_Strafes[client],g_sync[client],g_flastHeight[client]);
 			SQL_TQuery(g_hDb, SQL_CheckCallback, szQuery,DBPrio_Low);
 		}
 	}
@@ -2644,7 +2644,7 @@ public SQL_UpdateDropBhopRecordCallback(Handle:owner, Handle:hndl, const String:
 	new client = data;
 	if (IsClientInGame(client))
 	{
-		decl String:szQuery[255];
+		decl String:szQuery[512];
 		decl String:szUName[MAX_NAME_LENGTH];
 		GetClientName(client, szUName, MAX_NAME_LENGTH);
 		decl String:szName[MAX_NAME_LENGTH*2+1];
@@ -2653,12 +2653,12 @@ public SQL_UpdateDropBhopRecordCallback(Handle:owner, Handle:hndl, const String:
 		SQL_QuoteString(g_hDb, szUName, szName, MAX_NAME_LENGTH*2+1);
 		if(SQL_HasResultSet(hndl) && SQL_FetchRow(hndl))
 		{
-			Format(szQuery, 255, sql_updateDropBhop, szName, g_fPersonalDropBhopRecord[client], g_fPreStrafe[client], g_fMaxSpeed2[client], g_Strafes[client],g_sync[client],g_flastHeight[client], szSteamId);
+			Format(szQuery, 512, sql_updateDropBhop, szName, g_fPersonalDropBhopRecord[client], g_fPreStrafe[client], g_fMaxSpeed2[client], g_Strafes[client],g_sync[client],g_flastHeight[client], szSteamId);
 			SQL_TQuery(g_hDb, SQL_CheckCallback, szQuery,DBPrio_Low);
 		}
 		else
 		{
-			Format(szQuery, 255, sql_insertPlayerJumpDropBhop, szSteamId, szName, g_fPersonalDropBhopRecord[client], g_fPreStrafe[client], g_fMaxSpeed2[client], g_Strafes[client],g_sync[client],g_flastHeight[client]);
+			Format(szQuery, 512, sql_insertPlayerJumpDropBhop, szSteamId, szName, g_fPersonalDropBhopRecord[client], g_fPreStrafe[client], g_fMaxSpeed2[client], g_Strafes[client],g_sync[client],g_flastHeight[client]);
 			SQL_TQuery(g_hDb, SQL_CheckCallback, szQuery,DBPrio_Low);
 		}
 	}
@@ -2670,7 +2670,7 @@ public SQL_UpdateBhopRecordCallback(Handle:owner, Handle:hndl, const String:erro
 	new client = data;
 	if (IsClientInGame(client))
 	{
-		decl String:szQuery[255];
+		decl String:szQuery[512];
 		decl String:szUName[MAX_NAME_LENGTH];
 		GetClientName(client, szUName, MAX_NAME_LENGTH);
 		decl String:szName[MAX_NAME_LENGTH*2+1];
@@ -2679,12 +2679,12 @@ public SQL_UpdateBhopRecordCallback(Handle:owner, Handle:hndl, const String:erro
 		SQL_QuoteString(g_hDb, szUName, szName, MAX_NAME_LENGTH*2+1);
 		if(SQL_HasResultSet(hndl) && SQL_FetchRow(hndl))
 		{
-			Format(szQuery, 255, sql_updateBhop, szName, g_fPersonalBhopRecord[client], g_fPreStrafe[client], g_fMaxSpeed2[client], g_Strafes[client],g_sync[client],g_flastHeight[client], szSteamId);
+			Format(szQuery, 512, sql_updateBhop, szName, g_fPersonalBhopRecord[client], g_fPreStrafe[client], g_fMaxSpeed2[client], g_Strafes[client],g_sync[client],g_flastHeight[client], szSteamId);
 			SQL_TQuery(g_hDb, SQL_CheckCallback, szQuery,DBPrio_Low);
 		}
 		else
 		{
-			Format(szQuery, 255, sql_insertPlayerJumpBhop, szSteamId, szName, g_fPersonalBhopRecord[client], g_fPreStrafe[client], g_fMaxSpeed2[client], g_Strafes[client],g_sync[client],g_flastHeight[client]);
+			Format(szQuery, 512, sql_insertPlayerJumpBhop, szSteamId, szName, g_fPersonalBhopRecord[client], g_fPreStrafe[client], g_fMaxSpeed2[client], g_Strafes[client],g_sync[client],g_flastHeight[client]);
 			SQL_TQuery(g_hDb, SQL_CheckCallback, szQuery,DBPrio_Low);
 		}
 		db_viewBhopRecord2(client);
@@ -2696,7 +2696,7 @@ public SQL_UpdateMultiBhopRecordCallback(Handle:owner, Handle:hndl, const String
 	new client = data;
 	if (IsClientInGame(client))
 	{
-		decl String:szQuery[255];
+		decl String:szQuery[512];
 		decl String:szUName[MAX_NAME_LENGTH];
 		GetClientName(client, szUName, MAX_NAME_LENGTH);
 		decl String:szName[MAX_NAME_LENGTH*2+1];
@@ -2707,13 +2707,13 @@ public SQL_UpdateMultiBhopRecordCallback(Handle:owner, Handle:hndl, const String
 			return;
 		SQL_QuoteString(g_hDb, szUName, szName, MAX_NAME_LENGTH*2+1);
 		if(SQL_HasResultSet(hndl) && SQL_FetchRow(hndl))
-		{
-			Format(szQuery, 255, sql_updateMultiBhop, szName, g_fPersonalMultiBhopRecord[client], g_fPreStrafe[client], g_fMaxSpeed2[client], g_Strafes[client],g_multi_bhop_count[client],g_sync[client],g_flastHeight[client], szSteamId);
+		{		
+			Format(szQuery, 512, sql_updateMultiBhop, szName, g_fPersonalMultiBhopRecord[client], g_fPreStrafe[client], g_fMaxSpeed2[client], g_Strafes[client],g_multi_bhop_count[client],g_sync[client],g_flastHeight[client], szSteamId);
 			SQL_TQuery(g_hDb, SQL_CheckCallback, szQuery,DBPrio_Low);
 		}
 		else
-		{
-			Format(szQuery, 255, sql_insertPlayerJumpMultiBhop, szSteamId, szName, g_fPersonalMultiBhopRecord[client], g_fPreStrafe[client], g_fMaxSpeed2[client], g_Strafes[client],g_multi_bhop_count[client],g_sync[client],g_flastHeight[client]);
+		{		
+			Format(szQuery, 512, sql_insertPlayerJumpMultiBhop, szSteamId, szName, g_fPersonalMultiBhopRecord[client], g_fPreStrafe[client], g_fMaxSpeed2[client], g_Strafes[client],g_multi_bhop_count[client],g_sync[client],g_flastHeight[client]);
 			SQL_TQuery(g_hDb, SQL_CheckCallback, szQuery,DBPrio_Low);
 		}
 		db_viewMultiBhopRecord2(client);

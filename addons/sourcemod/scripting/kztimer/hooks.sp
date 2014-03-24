@@ -397,6 +397,7 @@ public Action:OnLogAction(Handle:source, Identity:ident, client, target, const S
 // OnPlayerRunCmd (Replay system, jumpstats) 
 public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:angles[3], &weapon, &subtype, &cmdnum, &tickcount, &seed, mouse[2])
 {
+	static MoveType:LastMoveType[MAXPLAYERS + 1];
 	g_CurrentButton[client] = buttons;
 	if (client > 0 && IsClientInGame(client) && IsPlayerAlive(client) && !g_bSpectate[client])
 	{	
@@ -634,6 +635,8 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 		///
 		//JUMPSTATS
 		///
+		new MoveType:movetype = GetEntityMoveType(client);  
+		
 		//Set GroundFrame
 		if (g_bPlayerJumped[client] == false && GetEntityFlags(client) & FL_ONGROUND && ((buttons & IN_MOVERIGHT) || (buttons & IN_MOVELEFT) || (buttons & IN_BACK) || (buttons & IN_FORWARD)))
 			g_ground_frames[client]++;
@@ -781,10 +784,9 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 		GetClientAbsOrigin(client, g_fPosOld[client]);
 		
 		//noclip used?
-		new MoveType:mt2 = GetEntityMoveType(client);  
 		if(!(GetEntityFlags(client) & FL_ONGROUND))
 		{	
-			if (mt2 == MOVETYPE_NOCLIP)
+			if (movetype == MOVETYPE_NOCLIP)
 				g_bNoClipUsed[client]=true;
 		}
 		else
@@ -970,12 +972,24 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 				g_bPlayerJumped[client] = false;
 		}
 		
+		
 		// landed?		
 		if(GetEntityFlags(client) & FL_ONGROUND && !g_bInvalidGround[client] && !g_bLastInvalidGround[client] && g_bPlayerJumped[client] == true && weapon != -1 && IsValidEntity(weapon) && GetEntProp(client, Prop_Data, "m_nWaterLevel") < 1)
 		{		
 			if (g_bJumpStats)
 				Postthink(client);
 		}
+			
+		//LadderJumpCheck (problems with jumping sideways)
+		/*if(movetype == MOVETYPE_WALK)
+		{
+			if(LastMoveType[client] == MOVETYPE_LADDER)
+			{
+				g_bLadderJump[client]=true;
+				Prethink(client, g_fLastPosition[client], g_fLastVelocity[client]);
+			}
+		}*/
+		
 		// last ground check (invalid?)
 		if (GetEntityFlags(client) & FL_ONGROUND)
 			g_bLastInvalidGround[client] = g_bInvalidGround[client];
@@ -983,11 +997,12 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 		// reset ground frames (wj)
 		if (!(GetEntityFlags(client) & FL_ONGROUND) && g_bPlayerJumped[client] == false)
 			g_ground_frames[client] = 0;		
-
+		
 		g_fLastAngle[client] = ang[1];
 		g_fLastVelocity[client] = newvelo;
 		g_fLastPosition[client] = origin;
 		g_LastButton[client] = buttons;
+		LastMoveType[client] = movetype;
 	}	
 	
 	//MACRODOX BHOP PROTECTION
@@ -1022,11 +1037,10 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 	return Plugin_Continue;
 }
 
-
 public Action:Event_OnJumpMacroDox(Handle:Event, const String:Name[], bool:Broadcast)
 {
 	new client = GetClientOfUserId(GetEventInt(Event, "userid"));
-	if(g_bBhopHackProtection && !IsFakeClient(client))
+	if(IsClientInGame(client) && g_bBhopHackProtection && !IsFakeClient(client))
 	{	
 		afAvgJumps[client] = ( afAvgJumps[client] * 9.0 + float(aiJumps[client]) ) / 10.0;  
 		decl Float:vec_vel[3];
@@ -1100,15 +1114,18 @@ public Action:Event_OnJumpMacroDox(Handle:Event, const String:Name[], bool:Broad
 public Action:Event_OnJump(Handle:Event, const String:Name[], bool:Broadcast)
 {
 	new client = GetClientOfUserId(GetEventInt(Event, "userid"));
+	new Float: tmp123[3];
 	if (g_bJumpStats)
-		Prethink(client);
-
+		Prethink(client,tmp123,0.0);
 }
 
-public Prethink (client)
+public Prethink (client, Float:pos[3], Float:vel)
 {	
 	if (!client)
 		return;
+	if (GetEntityFlags(client) & FL_ONGROUND && g_bLadderJump[client])
+		return;
+	
 	new weapon = GetEntPropEnt(client, Prop_Data, "m_hActiveWeapon");
 	if (!g_bSpectate[client] && IsPlayerAlive(client) && weapon != -1 && IsClientInGame(client))
 	{
@@ -1145,45 +1162,50 @@ public Prethink (client)
 		g_strafing_aw[client] = false;
 		g_strafing_sd[client] = false;
 		g_fMaxHeight[client] = -99999.0;			
-		
-		//get start position
-		GetClientAbsOrigin(client, g_fJump_Initial[client]);	
-		
-		//get prestrafe & takeoff speed
-		decl Float:fVelocity[3];
-		GetEntPropVector(client, Prop_Data, "m_vecVelocity", fVelocity);
-		g_fPreStrafe[client] = SquareRoot(Pow(fVelocity[0], 2.0) + Pow(fVelocity[1], 2.0) + Pow(fVelocity[2], 2.0));	
-		g_fTakeOffSpeed[client] = -1.0;
-		CreateTimer(0.015, GetTakeOffSpeedTimer, client,TIMER_FLAG_NO_MAPCHANGE);
-		
-		//DropJump?
-		if (g_fJump_InitialLastHeight[client] != -1.012345)
-		{				
-			new Float: fGroundDiff = g_fJump_Initial[client][2] - g_fJump_InitialLastHeight[client];
-			if(fGroundDiff < -1.9)
-				g_bDropJump[client] = true;
-			else
-			{
-				//must be here because touchwall detects some grounds too *csgo
-				if (g_bTouchWall[client])
-				{
-					g_bPlayerJumped[client]=false;
-					return;
-				}
-				g_bDropJump[client] = false;
-			}
-			if (g_bDropJump[client])
-				g_fDroppedUnits[client] = FloatAbs(fGroundDiff);
-		}
-		
-		//StandUpBhop?
-		g_fLastJumpTime[client] = GetEngineTime();
-		new Float: x = GetEngineTime() - g_fLastTimeDucked[client];
-		if (x <= 0.1)
+			
+		if (!g_bLadderJump[client])
 		{
-			g_bStandUpBhop[client]=true;
+			//get start position
+			GetClientAbsOrigin(client, g_fJump_Initial[client]);	
+			//get prestrafe & takeoff speed
+			decl Float:fVelocity[3];
+			GetEntPropVector(client, Prop_Data, "m_vecVelocity", fVelocity);
+			g_fPreStrafe[client] = SquareRoot(Pow(fVelocity[0], 2.0) + Pow(fVelocity[1], 2.0) + Pow(fVelocity[2], 2.0));	
+			g_fTakeOffSpeed[client] = -1.0;
+			CreateTimer(0.015, GetTakeOffSpeedTimer, client,TIMER_FLAG_NO_MAPCHANGE);
+			if (g_fJump_InitialLastHeight[client] != -1.012345)
+			{				
+				new Float: fGroundDiff = g_fJump_Initial[client][2] - g_fJump_InitialLastHeight[client];
+				if(fGroundDiff < -1.9)
+					g_bDropJump[client] = true;
+				else
+				{
+					//must be here because touchwall detects some grounds too *csgo
+					if (g_bTouchWall[client])
+					{
+						g_bPlayerJumped[client]=false;
+						return;
+					}
+					g_bDropJump[client] = false;
+				}
+				if (g_bDropJump[client])
+					g_fDroppedUnits[client] = FloatAbs(fGroundDiff);
+			}
+			
+			//StandUpBhop?
+			g_fLastJumpTime[client] = GetEngineTime();
+			new Float: x = GetEngineTime() - g_fLastTimeDucked[client];
+			if (x <= 0.1)
+			{
+				g_bStandUpBhop[client]=true;
+			}
 		}
-				
+		else
+		{
+			g_fJump_Initial[client] = pos;
+			g_fPreStrafe[client] = vel
+		}	
+	
 		//Noclip Used? blocks noclip boost at the timer
 		if (g_bNoClipUsed[client])
 		{
@@ -1302,7 +1324,7 @@ public Postthink(client)
 		Format(szStrafeStats,1024, "");
 	
 	//t00-b4d
-	if(g_fJump_Distance[client] < 200.0)
+	if(g_fJump_Distance[client] < 200.0 && !g_bLadderJump[client])
 	{
 		//multibhop count proforma
 		if (g_last_ground_frames[client] < 11 && ground_frames < 11 && fGroundDiff == 0.0  && fJump_Height <= 66.0 && !g_bDropJump[client])
@@ -1325,7 +1347,7 @@ public Postthink(client)
 		
 	//Chat Output
 	//LongJump
-	if (ground_frames > 11 && fGroundDiff == 0.0 && 200.0 < g_fPreStrafe[client] < 278.0 && fJump_Height <= 66.0) 
+	if (!g_bLadderJump[client] && ground_frames > 11 && fGroundDiff == 0.0 && 200.0 < g_fPreStrafe[client] < 278.0 && fJump_Height <= 66.0) 
 	{	
 		//WORKAROUND..probably already fixed.. happened at the beneath the water mill on kz_olympus
 		if ((!IsFakeClient(client) && strafes < 5 && g_fJump_Distance[client] > 254.0 && g_btickrate64) || ((!IsFakeClient(client) && strafes < 5 && g_fJump_Distance[client] > 260.0 && !g_btickrate64)) || (!IsFakeClient(client) && (g_fTakeOffSpeed[client] < 235.0 || strafes == 0)) || (IsFakeClient(client) && g_fJump_Distance[client] > 270.0))
@@ -1449,7 +1471,7 @@ public Postthink(client)
 		}
 	}
 	//Multi Bhop
-	if (g_last_ground_frames[client] < 11 && ground_frames < 11 && fGroundDiff == 0.0  && fJump_Height <= 66.0 && !g_bDropJump[client])
+	if (!g_bLadderJump[client] && g_last_ground_frames[client] < 11 && ground_frames < 11 && fGroundDiff == 0.0  && fJump_Height <= 66.0 && !g_bDropJump[client])
 	{		
 		g_multi_bhop_count[client]++;	
 		//block boost through a booster (e.g. bhop_monster_jam_b1 vip room exit)
@@ -1590,7 +1612,7 @@ public Postthink(client)
 	
 	//Drop Bunnyhop
 	
-	if (ground_frames < 11 && g_last_ground_frames[client] > 11 && g_bLastButtonJump[client] && fGroundDiff == 0.0 && fJump_Height <= 66.0 && g_bDropJump[client])
+	if (!g_bLadderJump[client] && ground_frames < 11 && g_last_ground_frames[client] > 11 && g_bLastButtonJump[client] && fGroundDiff == 0.0 && fJump_Height <= 66.0 && g_bDropJump[client])
 	{		
 		if (g_fDroppedUnits[client] > 132.0)
 		{
@@ -1702,7 +1724,7 @@ public Postthink(client)
 		}
 	}
 	// WeirdJump
-	if (ground_frames < 11 && !g_bLastButtonJump[client] && fGroundDiff == 0.0 && fJump_Height <= 66.0 && g_bDropJump[client])
+	if (!g_bLadderJump[client] && ground_frames < 11 && !g_bLastButtonJump[client] && fGroundDiff == 0.0 && fJump_Height <= 66.0 && g_bDropJump[client])
 	{						
 			if (g_fDroppedUnits[client] > 132.0)
 			{
@@ -1816,6 +1838,12 @@ public Postthink(client)
 				}
 			}
 	}
+	
+	if (g_bLadderJump[client])
+	{
+		PrintToChat(client,"dist: %f pre %f max %f strafes %f", g_fJump_Distance[client], g_fPreStrafe[client], g_fMaxSpeed2[client],strafes);
+		g_bLadderJump[client]=false;
+	}
 
 	//StandUp BunnyHop (detection works)
 	/*if (ground_frames < 11 && g_last_ground_frames[client] > 10 && fGroundDiff == 0.0 && fJump_Height <= 66.0 && !g_bDropJump[client] && g_bStandUpBhop[client])
@@ -1832,7 +1860,7 @@ public Postthink(client)
 		}
 	}*/
 	//BunnyHop
-	if (ground_frames < 11 && g_last_ground_frames[client] > 10 && fGroundDiff == 0.0 && fJump_Height <= 66.0 && !g_bDropJump[client] && g_fPreStrafe[client] > 200.0)
+	if (!g_bLadderJump[client] && ground_frames < 11 && g_last_ground_frames[client] > 10 && fGroundDiff == 0.0 && fJump_Height <= 66.0 && !g_bDropJump[client] && g_fPreStrafe[client] > 200.0)
 	{
 			//block invalid bot distances (has something to do with the ground-detection of the replay bot) WORKAROUND
 			if ((IsFakeClient(client) && g_fJump_Distance[client] > (g_dist_leet_bhop * 1.05)) || g_fJump_Distance[client] > 400.0)
