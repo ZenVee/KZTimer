@@ -11,7 +11,7 @@
 #include <geoip>
 #include <colors>
 #undef REQUIRE_EXTENSIONS
-#define VERSION "1.11 Nightly #5"
+#define VERSION "1.11 Nightly #6"
 #define ADMIN_LEVEL ADMFLAG_UNBAN
 #define WHITE 0x01
 #define DARKRED 0x02
@@ -299,7 +299,6 @@ new bool:g_bBhopHackProtection;
 new bool:g_bCCheckpoints[MAXPLAYERS+1];
 new bool:g_bTopMenuOpen[MAXPLAYERS+1]; 
 new bool:g_bStandUpBhop[MAXPLAYERS+1];
-new bool:g_bDetailView[MAXPLAYERS+1];
 new bool:g_bNoClipUsed[MAXPLAYERS+1];
 new bool:g_bMenuOpen[MAXPLAYERS+1];
 new bool:g_bRestartCords[MAXPLAYERS+1];
@@ -398,7 +397,9 @@ new g_pr_maprecords_row_count[MAX_PR_PLAYERS];
 new g_pr_oldpoints[MAX_PR_PLAYERS];  
 new g_pr_multiplier[MAX_PR_PLAYERS]; 
 new g_pr_finishedmaps_tp[MAX_PR_PLAYERS]; 
-new g_pr_finishedmaps_pro[MAX_PR_PLAYERS]; 
+new g_pr_finishedmaps_pro[MAX_PR_PLAYERS];
+new g_TopMenuLastPage[MAXPLAYERS+1] 
+new detailView[MAXPLAYERS+1];
 new g_CBet[MAXPLAYERS+1];
 new g_UspDrops[MAXPLAYERS+1];
 new g_sync[MAXPLAYERS+1];
@@ -1099,6 +1100,7 @@ public OnClientPostAdminCheck(client)
 		g_strafe_good_sync[client][i] = 0.0;
 		g_strafe_frames[client][i] = 0.0;
 	}
+	detailView[client]=-1;
 	g_UspDrops[client] = 0;
 	g_fPlayerCordsUndoTp[client][0] =0.0;
 	g_fPlayerCordsUndoTp[client][1] =0.0;

@@ -1763,6 +1763,8 @@ public ClimbersMenuHandler(Handle:menu, MenuAction:action, param1, param2)
 
 public TopMenu(client)
 {
+	detailView[client]=-1;
+	g_TopMenuLastPage[client] = 0;
 	g_bTopMenuOpen[client]=true;
 	g_bClimbersMenuOpen[client]=false;
 	new Handle:topmenu = CreateMenu(TopMenuHandler);

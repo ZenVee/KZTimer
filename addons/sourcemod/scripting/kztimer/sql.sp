@@ -20,7 +20,7 @@ new String:sql_updatePlayerRankChallenge[]		= "UPDATE playerrank SET multiplier 
 new String:sql_selectPlayerRankAll[] 			= "SELECT name, steamid FROM playerrank where name like '%s'";
 
 new String:sql_selectTopPlayers[]					= "SELECT name, points, finishedmapspro, finishedmapstp, steamid FROM playerrank ORDER BY points DESC LIMIT 100";
-new String:sql_selectTopChallengers[]			= "SELECT name, winratio, pointsratio FROM playerrank ORDER BY pointsratio DESC LIMIT 5";
+new String:sql_selectTopChallengers[]			= "SELECT name, winratio, pointsratio, steamid FROM playerrank ORDER BY pointsratio DESC LIMIT 5";
 new String:sql_selectRankedPlayer[]				= "SELECT steamid, name, points, finishedmapstp, finishedmapspro, multiplier, winratio, pointsratio, country from playerrank where steamid='%s'";
 new String:sql_selectRankedPlayersRank[]		= "SELECT name FROM playerrank WHERE points >= (SELECT points FROM playerrank WHERE steamid = '%s') ORDER BY points";
 new String:sql_selectRankedPlayers[]				= "SELECT steamid, name from playerrank where points > 0";
@@ -46,9 +46,9 @@ new String:sql_selectMapRecordCP[] 				= "SELECT runtime, name, teleports FROM p
 new String:sql_selectMapRecordPro[] 				= "SELECT runtimepro, name FROM playertimes WHERE mapname = '%s' AND runtimepro  > -1.0 ORDER BY runtimepro ASC LIMIT 1"; 
 new String:sql_selectPersonalRecords[] 			= "SELECT mapname, steamid, name, runtime, runtimepro, teleports  FROM playertimes WHERE steamid = '%s' AND mapname = '%s' AND (runtime  > -1.0 OR runtimepro  > -1.0)"; 
 new String:sql_selectPersonalAllRecords[] 		= "SELECT name, steamid, mapname, runtime as overall, teleports AS tp FROM playertimes WHERE steamid = '%s' AND runtime > -1.0 AND teleports >= 0 UNION SELECT name, steamid, mapname, runtimepro as overall, teleports_pro AS tp FROM playertimes WHERE steamid = '%s' AND runtimepro > -1.0 ORDER BY mapname ASC";
-new String:sql_selectTPClimbers[] 				= "SELECT name, runtime, teleports FROM playertimes WHERE mapname = '%s' AND runtime > -1.0 AND teleports >= 0 ORDER BY runtime ASC LIMIT 20";
-new String:sql_selectProClimbers[] 				= "SELECT name, runtimepro FROM playertimes WHERE mapname = '%s' AND runtimepro > -1.0 ORDER BY runtimepro ASC LIMIT 20";
-new String:sql_selectTopClimbers[] 				= "SELECT name, runtime as overall, teleports AS tp FROM playertimes WHERE mapname = '%s' AND runtime > -1.0 AND teleports >= 0 UNION SELECT name, runtimepro as overall, teleports_pro AS tp FROM playertimes WHERE mapname = '%s' AND runtimepro > -1.0 ORDER BY overall ASC LIMIT 100";
+new String:sql_selectTPClimbers[] 				= "SELECT name, runtime, teleports, steamid FROM playertimes WHERE mapname = '%s' AND runtime > -1.0 AND teleports >= 0 ORDER BY runtime ASC LIMIT 20";
+new String:sql_selectProClimbers[] 				= "SELECT name, runtimepro, steamid FROM playertimes WHERE mapname = '%s' AND runtimepro > -1.0 ORDER BY runtimepro ASC LIMIT 20";
+new String:sql_selectTopClimbers[] 				= "SELECT steamid, name, runtime as overall, teleports AS tp FROM playertimes WHERE mapname = '%s' AND runtime > -1.0 AND teleports >= 0 UNION SELECT steamid, name, runtimepro as overall, teleports_pro AS tp FROM playertimes WHERE mapname = '%s' AND runtimepro > -1.0 ORDER BY overall ASC LIMIT 100";
 new String:sql_selectPlayerCount[] 				= "SELECT name FROM playertimes WHERE mapname = '%s' AND runtime  > -1.0;";
 new String:sql_selectPlayerProCount[] 			= "SELECT name FROM playertimes WHERE mapname = '%s' AND runtimepro  > -1.0;";
 new String:sql_selectPlayerRankTime[] 			= "SELECT name,teleports,mapname FROM playertimes WHERE runtime <= (SELECT runtime FROM playertimes WHERE steamid = '%s' AND mapname = '%s' AND runtime > -1.0) AND mapname = '%s' AND runtime  > -1.0 ORDER BY runtime;";
@@ -466,7 +466,7 @@ public sql_selectGlobalTopClimbers(Handle:owner, Handle:hndl, const String:error
 		decl String:szTeleports[32];
 		new Float:time;
 		new teleports;
-		new Handle:menu = CreateMenu(MapMenuHandler1);	
+		new Handle:menu = CreateMenu(GlobalMapMenuHandler);	
 		SetMenuPagination(menu, 5);
 		SetMenuTitle(menu, "Top 5 Global Climbers (tickrate 64)\n       Time            TP's        Player");    
 		new i=1;
@@ -518,7 +518,7 @@ public sql_selectGlobalTopClimbers128(Handle:owner, Handle:hndl, const String:er
 		decl String:szTeleports[32];
 		new Float:time;
 		new teleports;
-		new Handle:menu = CreateMenu(MapMenuHandler1);	
+		new Handle:menu = CreateMenu(GlobalMapMenuHandler);	
 		SetMenuPagination(menu, 5);
 		SetMenuTitle(menu, "Top 5 Global Climbers (tickrate 128)\n       Time            TP's        Player");    
 		new i=1;
@@ -1015,13 +1015,7 @@ public JumpStatsMenuHandler(Handle:menu, MenuAction:action, param1,param2)
 {
 	if (action ==  MenuAction_Cancel || action ==  MenuAction_Select)
 	{
-		if (g_bDetailView[param1])
-		{
-			g_bDetailView[param1]=false;
-			JumpTopMenu(param1);
-		}
-		else
-			ProfileMenu(param1, -1);
+		ProfileMenu(param1, -1);
 	}
 	else if (action == MenuAction_End)
 	{
@@ -2401,19 +2395,29 @@ public ProfileMenuHandler(Handle:menu, MenuAction:action, param1,param2)
 	{
 		if (1 <= param1 <= MaxClients && IsClientInGame(param1))
 		{
-			if (g_bDetailView[param1])
+			switch(detailView[param1])
 			{
-				g_bDetailView[param1]=false;
-				db_selectTopPlayers(param1);
-			}
-			else
+				case 0: db_selectTopPlayers(param1);
+				case 1: db_selectTopClimbers(param1);
+				case 2: db_selectTopLj(param1);	
+				case 3: db_selectTopChallengers(param1);
+				case 4: db_selectTopWj(param1);
+				case 5: db_selectTopBhop(param1);
+				case 6: db_selectTopDropBhop(param1);	
+				case 7: db_selectTopMultiBhop(param1);	
+				case 8: db_selectTPClimbers(param1);	
+				case 9: db_selectProClimbers(param1);	
+				case 10: db_selectTopTpRecordHolders(param1);
+				case 11: db_selectTopProRecordHolders(param1);	
+			}	
+			if (detailView[param1] < 0)		
 			{
-			if (g_bSelectProfile[param1])
-				ProfileMenu(param1,0);
-			else
-				g_bMenuOpen[param1]=false;	
+				if (g_bSelectProfile[param1])
+					ProfileMenu(param1,0);
+				else
+					g_bMenuOpen[param1]=false;	
 			}
-		}
+		}							
 	}
 	else 
 		if (action == MenuAction_End)	
@@ -2965,13 +2969,13 @@ public sql_ViewMapButtonsCallback(Handle:owner, Handle:hndl, const String:error[
 public sql_selectPlayerJumpTopLJCallback(Handle:owner, Handle:hndl, const String:error[], any:data)
 {       
 	new client = data;
-	decl String:szValue[64];
-	decl String:szName[MAX_NAME_LENGTH];
+	decl String:szValue[128];
+	decl String:szName[64];
 	decl String:szSteamID[32];
 	new Float:ljrecord;
 	new String:szStrafes[32];
 	new strafes;
-	new Handle:menu = CreateMenu(JumpMenuHandler1);
+	new Handle:menu = CreateMenu(LjJumpMenuHandler1);
 	SetMenuTitle(menu, "Top 20 Longjump\n    Rank    Distance           Strafes      Player");  
 	SetMenuPagination(menu, 5);
 	if(SQL_HasResultSet(hndl))
@@ -2979,7 +2983,7 @@ public sql_selectPlayerJumpTopLJCallback(Handle:owner, Handle:hndl, const String
 		new i = 1;
 		while (SQL_FetchRow(hndl))
 		{
-			SQL_FetchString(hndl, 0, szName, MAX_NAME_LENGTH);
+			SQL_FetchString(hndl, 0, szName, 64);
 			ljrecord = SQL_FetchFloat(hndl, 1); 
 			strafes = SQL_FetchInt(hndl, 2); 
 			SQL_FetchString(hndl, 3, szSteamID, 32);
@@ -2988,9 +2992,9 @@ public sql_selectPlayerJumpTopLJCallback(Handle:owner, Handle:hndl, const String
 			else
 				Format(szStrafes, 32, "%i", strafes); 
 			if (i < 10)
-					Format(szValue, 64, "[0%i.]    %.3f units      %s      » %s", i, ljrecord,szStrafes, szName);
+					Format(szValue, 128, "[0%i.]    %.3f units      %s      » %s", i, ljrecord,szStrafes, szName);
 				else
-					Format(szValue, 64, "[%i.]    %.3f units      %s      » %s", i, ljrecord,szStrafes, szName);
+					Format(szValue, 128, "[%i.]    %.3f units      %s      » %s", i, ljrecord,szStrafes, szName);
 			AddMenuItem(menu, szSteamID, szValue, ITEMDRAW_DEFAULT);
 			i++;
 		}
@@ -3002,13 +3006,13 @@ public sql_selectPlayerJumpTopLJCallback(Handle:owner, Handle:hndl, const String
 public sql_selectPlayerJumpTopWJCallback(Handle:owner, Handle:hndl, const String:error[], any:data)
 {       
 	new client = data;
-	decl String:szValue[64];
-	decl String:szName[MAX_NAME_LENGTH];
+	decl String:szValue[128];
+	decl String:szName[64];
 	new Float:ljrecord;
 	new String:szStrafes[32];
 	decl String:szSteamID[32];
 	new strafes;
-	new Handle:menu = CreateMenu(JumpMenuHandler1);
+	new Handle:menu = CreateMenu(WjJumpMenuHandler1);
 	SetMenuTitle(menu, "Top 20 Weirdjump\n    Rank    Distance           Strafes      Player");  
 	SetMenuPagination(menu, 5);
 	if(SQL_HasResultSet(hndl))
@@ -3016,7 +3020,7 @@ public sql_selectPlayerJumpTopWJCallback(Handle:owner, Handle:hndl, const String
 		new i = 1;
 		while (SQL_FetchRow(hndl))
 		{
-			SQL_FetchString(hndl, 0, szName, MAX_NAME_LENGTH);
+			SQL_FetchString(hndl, 0, szName, 64);
 			ljrecord = SQL_FetchFloat(hndl, 1); 
 			strafes = SQL_FetchInt(hndl, 2); 
 			SQL_FetchString(hndl, 3, szSteamID, 32);
@@ -3025,9 +3029,9 @@ public sql_selectPlayerJumpTopWJCallback(Handle:owner, Handle:hndl, const String
 			else
 				Format(szStrafes, 32, "%i", strafes); 
 			if (i < 10)
-					Format(szValue, 64, "[0%i.]    %.3f units      %s      » %s", i, ljrecord,szStrafes, szName);
+					Format(szValue, 128, "[0%i.]    %.3f units      %s      » %s", i, ljrecord,szStrafes, szName);
 				else
-					Format(szValue, 64, "[%i.]    %.3f units      %s      » %s", i, ljrecord,szStrafes, szName);
+					Format(szValue, 128, "[%i.]    %.3f units      %s      » %s", i, ljrecord,szStrafes, szName);
 			AddMenuItem(menu, szSteamID, szValue, ITEMDRAW_DEFAULT);
 			i++;
 		}
@@ -3039,13 +3043,13 @@ public sql_selectPlayerJumpTopWJCallback(Handle:owner, Handle:hndl, const String
 public sql_selectPlayerJumpTopBhopCallback(Handle:owner, Handle:hndl, const String:error[], any:data)
 {       
 	new client = data;
-	decl String:szValue[64];
-	decl String:szName[MAX_NAME_LENGTH];
+	decl String:szValue[128];
+	decl String:szName[64];
 	new Float:bhoprecord;
 	decl String:szSteamID[32];
 	new String:szStrafes[32];
 	new strafes;
-	new Handle:menu = CreateMenu(JumpMenuHandler1);
+	new Handle:menu = CreateMenu(BhopJumpMenuHandler1);
 	SetMenuTitle(menu, "Top 20 Bunnyhop\n    Rank    Distance           Strafes      Player");  
 	SetMenuPagination(menu, 5);
 	if(SQL_HasResultSet(hndl))
@@ -3053,7 +3057,7 @@ public sql_selectPlayerJumpTopBhopCallback(Handle:owner, Handle:hndl, const Stri
 		new i = 1;
 		while (SQL_FetchRow(hndl))
 		{
-			SQL_FetchString(hndl, 0, szName, MAX_NAME_LENGTH);
+			SQL_FetchString(hndl, 0, szName, 64);
 			bhoprecord = SQL_FetchFloat(hndl, 1); 
 			strafes = SQL_FetchInt(hndl, 2); 
 			SQL_FetchString(hndl, 3, szSteamID, 32);
@@ -3062,9 +3066,9 @@ public sql_selectPlayerJumpTopBhopCallback(Handle:owner, Handle:hndl, const Stri
 			else
 				Format(szStrafes, 32, "%i", strafes); 
 			if (i < 10)
-					Format(szValue, 64, "[0%i.]    %.3f units      %s      » %s", i, bhoprecord,szStrafes, szName);
+					Format(szValue, 128, "[0%i.]    %.3f units      %s      » %s", i, bhoprecord,szStrafes, szName);
 				else
-					Format(szValue, 64, "[%i.]    %.3f units      %s      » %s", i, bhoprecord,szStrafes, szName);
+					Format(szValue, 128, "[%i.]    %.3f units      %s      » %s", i, bhoprecord,szStrafes, szName);
 			AddMenuItem(menu, szSteamID, szValue, ITEMDRAW_DEFAULT);
 			i++;
 		}
@@ -3076,13 +3080,13 @@ public sql_selectPlayerJumpTopBhopCallback(Handle:owner, Handle:hndl, const Stri
 public sql_selectPlayerJumpTopDropBhopCallback(Handle:owner, Handle:hndl, const String:error[], any:data)
 {       
 	new client = data;
-	decl String:szValue[64];
-	decl String:szName[MAX_NAME_LENGTH];
+	decl String:szValue[128];
+	decl String:szName[64];
 	new Float:bhoprecord;
 	decl String:szSteamID[32];
 	new String:szStrafes[32];
 	new strafes;
-	new Handle:menu = CreateMenu(JumpMenuHandler1);
+	new Handle:menu = CreateMenu(DropBhopJumpMenuHandler1);
 	SetMenuTitle(menu, "Top 20 Drop-Bunnyhop\n    Rank    Distance           Strafes      Player");  
 	SetMenuPagination(menu, 5);
 	if(SQL_HasResultSet(hndl))
@@ -3090,7 +3094,7 @@ public sql_selectPlayerJumpTopDropBhopCallback(Handle:owner, Handle:hndl, const 
 		new i = 1;
 		while (SQL_FetchRow(hndl))
 		{
-			SQL_FetchString(hndl, 0, szName, MAX_NAME_LENGTH);
+			SQL_FetchString(hndl, 0, szName, 64);
 			bhoprecord = SQL_FetchFloat(hndl, 1); 
 			strafes = SQL_FetchInt(hndl, 2); 
 			SQL_FetchString(hndl, 3, szSteamID, 32);
@@ -3099,9 +3103,9 @@ public sql_selectPlayerJumpTopDropBhopCallback(Handle:owner, Handle:hndl, const 
 			else
 				Format(szStrafes, 32, "%i", strafes); 
 			if (i < 10)
-					Format(szValue, 64, "[0%i.]    %.3f units      %s      » %s", i, bhoprecord,szStrafes, szName);
+					Format(szValue, 128, "[0%i.]    %.3f units      %s      » %s", i, bhoprecord,szStrafes, szName);
 				else
-					Format(szValue, 64, "[%i.]    %.3f units      %s      » %s", i, bhoprecord,szStrafes, szName);
+					Format(szValue, 128, "[%i.]    %.3f units      %s      » %s", i, bhoprecord,szStrafes, szName);
 			AddMenuItem(menu, szSteamID, szValue, ITEMDRAW_DEFAULT);
 			i++;
 		}
@@ -3113,13 +3117,13 @@ public sql_selectPlayerJumpTopDropBhopCallback(Handle:owner, Handle:hndl, const 
 public sql_selectPlayerJumpTopMultiBhopCallback(Handle:owner, Handle:hndl, const String:error[], any:data)
 {       
 	new client = data;
-	decl String:szValue[64];
-	decl String:szName[MAX_NAME_LENGTH];
+	decl String:szValue[128];
+	decl String:szName[64];
 	new Float:multibhoprecord;
 	decl String:szSteamID[32];
 	new String:szStrafes[32];
 	new strafes;
-	new Handle:menu = CreateMenu(JumpMenuHandler1);
+	new Handle:menu = CreateMenu(MultiBhopJumpMenuHandler1);
 	SetMenuTitle(menu, "Top 20 Multi-Bunnyhop\n    Rank    Distance           Strafes      Player");  
 	SetMenuPagination(menu, 5);
 	if(SQL_HasResultSet(hndl))
@@ -3127,7 +3131,7 @@ public sql_selectPlayerJumpTopMultiBhopCallback(Handle:owner, Handle:hndl, const
 		new i = 1;
 		while (SQL_FetchRow(hndl))
 		{
-			SQL_FetchString(hndl, 0, szName, MAX_NAME_LENGTH);
+			SQL_FetchString(hndl, 0, szName, 64);
 			multibhoprecord = SQL_FetchFloat(hndl, 1); 
 			strafes = SQL_FetchInt(hndl, 2); 
 			SQL_FetchString(hndl, 3, szSteamID, 32);
@@ -3136,9 +3140,9 @@ public sql_selectPlayerJumpTopMultiBhopCallback(Handle:owner, Handle:hndl, const
 			else
 				Format(szStrafes, 32, "%i", strafes); 	
 			if (i < 10)
-					Format(szValue, 64, "[0%i.]    %.3f units      %s      » %s", i, multibhoprecord,szStrafes, szName);
+					Format(szValue, 128, "[0%i.]    %.3f units      %s      » %s", i, multibhoprecord,szStrafes, szName);
 				else
-					Format(szValue, 64, "[%i.]    %.3f units      %s      » %s", i, multibhoprecord,szStrafes, szName);
+					Format(szValue, 128, "[%i.]    %.3f units      %s      » %s", i, multibhoprecord,szStrafes, szName);
 			AddMenuItem(menu, szSteamID, szValue, ITEMDRAW_DEFAULT);
 			i++;
 		}
@@ -3150,11 +3154,12 @@ public sql_selectPlayerJumpTopMultiBhopCallback(Handle:owner, Handle:hndl, const
 public sql_selectTopClimbersCallback(Handle:owner, Handle:hndl, const String:error[], any:data)
 {       
 	new client = data;
-	decl String:szValue[64];
-	decl String:szName[MAX_NAME_LENGTH];
+	decl String:szValue[128];
+	decl String:szName[64];
 	new Float:time;
 	new teleports;
 	decl String:szTeleports[32];
+	decl String:szSteamID[32];
 	new String:lineBuf[256];
 	new Handle:stringArray = CreateArray(100);
 	new Handle:menu = CreateMenu(MapMenuHandler1);
@@ -3167,10 +3172,10 @@ public sql_selectTopClimbersCallback(Handle:owner, Handle:hndl, const String:err
 		while (SQL_FetchRow(hndl))
 		{
 			bduplicat = false;
-			SQL_FetchString(hndl, 0, szName, MAX_NAME_LENGTH);
-			time = SQL_FetchFloat(hndl, 1); 
-			teleports = SQL_FetchInt(hndl, 2);
-			
+			SQL_FetchString(hndl, 0, szSteamID, 32);
+			SQL_FetchString(hndl, 1, szName, 64);
+			time = SQL_FetchFloat(hndl, 2); 
+			teleports = SQL_FetchInt(hndl, 3);		
 			new stringArraySize = GetArraySize(stringArray);
 			for(new x = 0; x < stringArraySize; x++)
 			{
@@ -3192,12 +3197,12 @@ public sql_selectTopClimbersCallback(Handle:owner, Handle:hndl, const String:err
 				if (time<3600.0)
 					Format(g_szTime[client], 32, "   %s", g_szTime[client]);			
 				if (i == 100)
-					Format(szValue, 64, "[%i.] %s | %s    » %s", i, g_szTime[client], szTeleports, szName);
+					Format(szValue, 128, "[%i.] %s | %s    » %s", i, g_szTime[client], szTeleports, szName);
 				if (i >= 10)
-					Format(szValue, 64, "[%i.] %s | %s    » %s", i, g_szTime[client], szTeleports, szName);
+					Format(szValue, 128, "[%i.] %s | %s    » %s", i, g_szTime[client], szTeleports, szName);
 				else
-					Format(szValue, 64, "[0%i.] %s | %s    » %s", i, g_szTime[client], szTeleports, szName);
-				AddMenuItem(menu, szValue, szValue, ITEMDRAW_DEFAULT);
+					Format(szValue, 128, "[0%i.] %s | %s    » %s", i, g_szTime[client], szTeleports, szName);
+				AddMenuItem(menu, szSteamID, szValue, ITEMDRAW_DEFAULT);
 				PushArrayString(stringArray, szName);
 				i++;
 			}
@@ -3214,12 +3219,13 @@ public sql_selectTopClimbersCallback(Handle:owner, Handle:hndl, const String:err
 public sql_selectTPClimbersCallback(Handle:owner, Handle:hndl, const String:error[], any:data)
 {       
 	new client = data;
-	decl String:szValue[64];
-	decl String:szName[MAX_NAME_LENGTH];
+	decl String:szValue[128];
+	decl String:szName[64];
 	new Float:time;
 	new teleports;
 	decl String:szTeleports[32];
-	new Handle:menu = CreateMenu(MapMenuHandler1);
+	decl String:szSteamID[32];
+	new Handle:menu = CreateMenu(MapMenuHandler2);
 	SetMenuPagination(menu, 5);
 	SetMenuTitle(menu, "Top 20 TP Climbers (local)\n    Rank    Time          TP's          Player");     
 	if(SQL_HasResultSet(hndl))
@@ -3227,9 +3233,10 @@ public sql_selectTPClimbersCallback(Handle:owner, Handle:hndl, const String:erro
 		new i = 1;
 		while (SQL_FetchRow(hndl))
 		{
-			SQL_FetchString(hndl, 0, szName, MAX_NAME_LENGTH);
+			SQL_FetchString(hndl, 0, szName, 64);
 			time = SQL_FetchFloat(hndl, 1); 
-			teleports = SQL_FetchInt(hndl, 2);
+			teleports = SQL_FetchInt(hndl, 2);		
+			SQL_FetchString(hndl, 3, szSteamID, 32);
 			if (teleports < 10)
 				Format(szTeleports, 32, "    %i",teleports);
 			else
@@ -3242,10 +3249,10 @@ public sql_selectTPClimbersCallback(Handle:owner, Handle:hndl, const String:erro
 			if (time<3600.0)
 				Format(g_szTime[client], 32, "   %s", g_szTime[client]);			
 			if (i < 10)
-				Format(szValue, 64, "[0%i.] %s | %s      » %s", i, g_szTime[client], szTeleports, szName);
+				Format(szValue, 128, "[0%i.] %s | %s      » %s", i, g_szTime[client], szTeleports, szName);
 			else
-				Format(szValue, 64, "[%i.] %s | %s      » %s", i, g_szTime[client], szTeleports, szName);
-			AddMenuItem(menu, szValue, szValue, ITEMDRAW_DEFAULT);
+				Format(szValue, 128, "[%i.] %s | %s      » %s", i, g_szTime[client], szTeleports, szName);
+			AddMenuItem(menu, szSteamID, szValue, ITEMDRAW_DEFAULT);
 			i++;
 		}
 		if(i == 1)
@@ -3259,10 +3266,11 @@ public sql_selectTPClimbersCallback(Handle:owner, Handle:hndl, const String:erro
 public sql_selectProClimbersCallback(Handle:owner, Handle:hndl, const String:error[], any:data)
 {      
 	new client = data;
-	decl String:szValue[64];
-	decl String:szName[MAX_NAME_LENGTH];
+	decl String:szValue[128];
+	decl String:szSteamID[32];
+	decl String:szName[64];
 	new Float:time;
-	new Handle:menu = CreateMenu(MapMenuHandler1);
+	new Handle:menu = CreateMenu(MapMenuHandler3);
 	SetMenuPagination(menu, 5);
 	SetMenuTitle(menu, "Top 20 PRO Climbers (local)\n    Rank   Time               Player");     
 	if(SQL_HasResultSet(hndl))
@@ -3271,16 +3279,17 @@ public sql_selectProClimbersCallback(Handle:owner, Handle:hndl, const String:err
 		new i = 1;
 		while (SQL_FetchRow(hndl))
 		{		
-			SQL_FetchString(hndl, 0, szName, MAX_NAME_LENGTH);
-			time = SQL_FetchFloat(hndl, 1);
-			FormatTimeFloat(client, time, 3);	
+			SQL_FetchString(hndl, 0, szName, 64);
+			time = SQL_FetchFloat(hndl, 1);		
+			SQL_FetchString(hndl, 2, szSteamID, 32);
+			FormatTimeFloat(client, time, 3);			
 			if (time<3600.0)
 				Format(g_szTime[client], 32, "  %s", g_szTime[client]);
 			if (i < 10)
-				Format(szValue, 64, "[0%i.] %s    » %s", i, g_szTime[client], szName);
+				Format(szValue, 128, "[0%i.] %s    » %s", i, g_szTime[client], szName);
 			else
-				Format(szValue, 64, "[%i.] %s    » %s", i, g_szTime[client], szName);
-			AddMenuItem(menu, szValue, szValue, ITEMDRAW_DEFAULT);
+				Format(szValue, 128, "[%i.] %s    » %s", i, g_szTime[client], szName);
+			AddMenuItem(menu, szSteamID, szValue, ITEMDRAW_DEFAULT);
 			i++;
 		}
 		if(i == 1)
@@ -3291,9 +3300,59 @@ public sql_selectProClimbersCallback(Handle:owner, Handle:hndl, const String:err
 	SetMenuOptionFlags(menu, MENUFLAG_BUTTON_EXIT);
 	DisplayMenu(menu, client, MENU_TIME_FOREVER);
 }
-public TopMenuHandler1(Handle:menu, MenuAction:action, param1, param2)
+public TopChallengeHandler1(Handle:menu, MenuAction:action, param1, param2)
 {
-	if (action ==  MenuAction_Cancel || action ==  MenuAction_Select)
+
+	if (action ==  MenuAction_Select)
+	{
+		decl String:info[32];
+		GetMenuItem(menu, param2, info, sizeof(info));
+		detailView[param1]=3;
+		db_viewPlayerRank(param1,info);
+	}
+
+	if (action ==  MenuAction_Cancel)
+	{
+		TopMenu(param1);
+	}
+	else if (action == MenuAction_End)
+	{
+		CloseHandle(menu);
+	}
+}
+
+public TopTpHoldersHandler1(Handle:menu, MenuAction:action, param1, param2)
+{
+
+	if (action ==  MenuAction_Select)
+	{
+		decl String:info[32];
+		GetMenuItem(menu, param2, info, sizeof(info));
+		detailView[param1]=10;
+		db_viewPlayerRank(param1,info);
+	}
+
+	if (action ==  MenuAction_Cancel)
+	{
+		TopMenu(param1);
+	}
+	else if (action == MenuAction_End)
+	{
+		CloseHandle(menu);
+	}
+}
+public TopProHoldersHandler1(Handle:menu, MenuAction:action, param1, param2)
+{
+
+	if (action ==  MenuAction_Select)
+	{
+		decl String:info[32];
+		GetMenuItem(menu, param2, info, sizeof(info));
+		detailView[param1]=11;
+		db_viewPlayerRank(param1,info);
+	}
+
+	if (action ==  MenuAction_Cancel)
 	{
 		TopMenu(param1);
 	}
@@ -3309,7 +3368,7 @@ public TopPlayersMenuHandler1(Handle:menu, MenuAction:action, param1, param2)
 	{
 		decl String:info[32];
 		GetMenuItem(menu, param2, info, sizeof(info));
-		g_bDetailView[param1]=true;
+		detailView[param1]=0;
 		db_viewPlayerRank(param1,info);
 	}
 	if (action ==  MenuAction_Cancel)
@@ -3322,14 +3381,14 @@ public TopPlayersMenuHandler1(Handle:menu, MenuAction:action, param1, param2)
 	}
 }
 
-public JumpMenuHandler1(Handle:menu, MenuAction:action, param1, param2)
+public LjJumpMenuHandler1(Handle:menu, MenuAction:action, param1, param2)
 {
 	if (action ==  MenuAction_Select)
 	{
 		decl String:info[32];
 		GetMenuItem(menu, param2, info, sizeof(info));
-		db_viewJumpStats(param1, info);
-		g_bDetailView[param1] = true;
+		detailView[param1] = 2;
+		db_viewPlayerRank(param1, info);	
 	}
 	if (action ==  MenuAction_Cancel)
 	{
@@ -3340,7 +3399,140 @@ public JumpMenuHandler1(Handle:menu, MenuAction:action, param1, param2)
 		CloseHandle(menu);
 	}
 }
+public WjJumpMenuHandler1(Handle:menu, MenuAction:action, param1, param2)
+{
+	if (action ==  MenuAction_Select)
+	{
+		decl String:info[32];
+		GetMenuItem(menu, param2, info, sizeof(info));
+		detailView[param1] = 4;
+		db_viewPlayerRank(param1, info);	
+	}
+	if (action ==  MenuAction_Cancel)
+	{
+		JumpTopMenu(param1);
+	}
+	else if (action == MenuAction_End)
+	{
+		CloseHandle(menu);
+	}
+}
+public BhopJumpMenuHandler1(Handle:menu, MenuAction:action, param1, param2)
+{
+	if (action ==  MenuAction_Select)
+	{
+		decl String:info[32];
+		GetMenuItem(menu, param2, info, sizeof(info));
+		detailView[param1] = 5;
+		db_viewPlayerRank(param1, info);	
+	}
+	if (action ==  MenuAction_Cancel)
+	{
+		JumpTopMenu(param1);
+	}
+	else if (action == MenuAction_End)
+	{
+		CloseHandle(menu);
+	}
+}
+public DropBhopJumpMenuHandler1(Handle:menu, MenuAction:action, param1, param2)
+{
+	if (action ==  MenuAction_Select)
+	{
+		decl String:info[32];
+		GetMenuItem(menu, param2, info, sizeof(info));
+		detailView[param1] = 6;
+		db_viewPlayerRank(param1, info);	
+	}
+	if (action ==  MenuAction_Cancel)
+	{
+		JumpTopMenu(param1);
+	}
+	else if (action == MenuAction_End)
+	{
+		CloseHandle(menu);
+	}
+}
+
+public MultiBhopJumpMenuHandler1(Handle:menu, MenuAction:action, param1, param2)
+{
+	if (action ==  MenuAction_Select)
+	{
+		decl String:info[32];
+		GetMenuItem(menu, param2, info, sizeof(info));
+		detailView[param1] = 7;
+		db_viewPlayerRank(param1, info);	
+	}
+	if (action ==  MenuAction_Cancel)
+	{
+		JumpTopMenu(param1);
+	}
+	else if (action == MenuAction_End)
+	{
+		CloseHandle(menu);
+	}
+}
+
 public MapMenuHandler1(Handle:menu, MenuAction:action, param1, param2)
+{
+	if (action ==  MenuAction_Select)
+	{
+		decl String:info[32];
+		GetMenuItem(menu, param2, info, sizeof(info));
+		detailView[param1] = 1;
+		db_viewPlayerRank(param1, info);		
+	}
+	if (action ==  MenuAction_Cancel)
+	{
+		MapTopMenu(param1);
+	}
+	else if (action == MenuAction_End)
+	{
+		CloseHandle(menu);
+	}
+}
+
+public MapMenuHandler2(Handle:menu, MenuAction:action, param1, param2)
+{
+	if (action ==  MenuAction_Select)
+	{
+		decl String:info[32];
+		GetMenuItem(menu, param2, info, sizeof(info));
+		detailView[param1] = 8;
+		db_viewPlayerRank(param1, info);		
+	}
+	if (action ==  MenuAction_Cancel)
+	{
+		MapTopMenu(param1);
+	}
+	else if (action == MenuAction_End)
+	{
+		CloseHandle(menu);
+	}
+}
+
+
+public MapMenuHandler3(Handle:menu, MenuAction:action, param1, param2)
+{
+	if (action ==  MenuAction_Select)
+	{
+		decl String:info[32];
+		GetMenuItem(menu, param2, info, sizeof(info));
+		detailView[param1] = 9;
+		db_viewPlayerRank(param1, info);		
+	}
+	if (action ==  MenuAction_Cancel)
+	{
+		MapTopMenu(param1);
+	}
+	else if (action == MenuAction_End)
+	{
+		CloseHandle(menu);
+	}
+}
+
+
+public GlobalMapMenuHandler(Handle:menu, MenuAction:action, param1, param2)
 {
 	if (action ==  MenuAction_Cancel || action ==  MenuAction_Select)
 	{
@@ -4348,10 +4540,11 @@ public sql_selectTopChallengersCallback(Handle:owner, Handle:hndl, const String:
 	decl String:szValue[64];
 	decl String:szName[MAX_NAME_LENGTH];
 	decl String:szWinRatio[32];
+	decl String:szSteamID[32];
 	decl String:szPointsRatio[32];
 	new winratio;
 	new pointsratio;
-	new Handle:menu = CreateMenu(TopMenuHandler1);
+	new Handle:menu = CreateMenu(TopChallengeHandler1);
 	SetMenuPagination(menu, 5); 
 	SetMenuTitle(menu, "Top 5 Challengers\n#   W/L P.-Ratio    Player (W/L ratio)");     
 	if(SQL_HasResultSet(hndl))
@@ -4361,7 +4554,8 @@ public sql_selectTopChallengersCallback(Handle:owner, Handle:hndl, const String:
 		{	
 			SQL_FetchString(hndl, 0, szName, MAX_NAME_LENGTH);
 			winratio = SQL_FetchInt(hndl, 1); 
-			pointsratio = SQL_FetchInt(hndl, 2); 		
+			pointsratio = SQL_FetchInt(hndl, 2); 
+			SQL_FetchString(hndl, 3, szSteamID, 32);			
 			if (winratio>=0)
 				Format(szWinRatio, 32, "+%i",winratio);
 			else
@@ -4386,7 +4580,7 @@ public sql_selectTopChallengersCallback(Handle:owner, Handle:hndl, const String:
 					else
 						if (pointsratio  < 10000)
 							Format(szValue, 64, "       %s   » %s (%s)", szPointsRatio, szName,szWinRatio);	
-			AddMenuItem(menu, szValue, szValue, ITEMDRAW_DEFAULT);
+			AddMenuItem(menu, szSteamID, szValue, ITEMDRAW_DEFAULT);
 			i++;
 		}
 		if(i == 1)
@@ -4424,7 +4618,7 @@ public db_sql_selectProRecordHoldersCallback(Handle:owner, Handle:hndl, const St
 	if(SQL_HasResultSet(hndl))
 	{
 		new i = SQL_GetRowCount(hndl);
-		g_hTopJumpersMenu[client] = CreateMenu(TopMenuHandler1);
+		g_hTopJumpersMenu[client] = CreateMenu(TopProHoldersHandler1);
 		SetMenuTitle(g_hTopJumpersMenu[client], "Top 5 Pro Jumpers\n#   Records       Player");   
 		while (SQL_FetchRow(hndl))
 		{		
@@ -4439,6 +4633,7 @@ public db_sql_selectProRecordHoldersCallback(Handle:owner, Handle:hndl, const St
 			WritePackCell(pack, client);
 			WritePackString(pack, szRecords);
 			WritePackCell(pack, i);
+			WritePackString(pack, szSteamID);
 			Format(szQuery, 256, sql_selectRankedPlayer, szSteamID);
 			SQL_TQuery(g_hDb, db_sql_selectProRecordHoldersCallback2, szQuery, pack);
 			i--;
@@ -4456,6 +4651,7 @@ public db_sql_selectProRecordHoldersCallback2(Handle:owner, Handle:hndl, const S
 	if(SQL_HasResultSet(hndl) && SQL_FetchRow(hndl))
 	{
 		decl String:szName[MAX_NAME_LENGTH];
+		decl String:szSteamID[32];
 		decl String:szRecords[64];
 		decl String:szValue[128];
 		new Handle:pack = data;
@@ -4463,10 +4659,11 @@ public db_sql_selectProRecordHoldersCallback2(Handle:owner, Handle:hndl, const S
 		new client = ReadPackCell(pack);      
 		ReadPackString(pack, szRecords, 64);	
 		new count = ReadPackCell(pack); 
+		ReadPackString(pack, szSteamID, 32);	
 		CloseHandle(pack);
 		SQL_FetchString(hndl, 1, szName, MAX_NAME_LENGTH);
 		Format(szValue, 128, "      %s       »  %s",szRecords, szName);
-		AddMenuItem(g_hTopJumpersMenu[client], szValue, szValue, ITEMDRAW_DEFAULT);
+		AddMenuItem(g_hTopJumpersMenu[client], szSteamID, szValue, ITEMDRAW_DEFAULT);
 		if (count==1)
 		{
 			SetMenuOptionFlags(g_hTopJumpersMenu[client], MENUFLAG_BUTTON_EXIT);
@@ -4492,7 +4689,7 @@ public db_sql_selectTpRecordHoldersCallback(Handle:owner, Handle:hndl, const Str
 	if(SQL_HasResultSet(hndl))
 	{
 		new i = SQL_GetRowCount(hndl);
-		g_hTopJumpersMenu[client] = CreateMenu(TopMenuHandler1);
+		g_hTopJumpersMenu[client] = CreateMenu(TopTpHoldersHandler1);
 		SetMenuTitle(g_hTopJumpersMenu[client], "Top 5 TP Jumpers\n#   Records       Player");   
 		while (SQL_FetchRow(hndl))
 		{		
@@ -4507,6 +4704,7 @@ public db_sql_selectTpRecordHoldersCallback(Handle:owner, Handle:hndl, const Str
 			WritePackCell(pack, client);
 			WritePackString(pack, szRecords);
 			WritePackCell(pack, i);
+			WritePackString(pack, szSteamID);
 			Format(szQuery, 256, sql_selectRankedPlayer, szSteamID);
 			SQL_TQuery(g_hDb, db_sql_selectTpRecordHoldersCallback2, szQuery, pack);
 			i--;
@@ -4524,17 +4722,19 @@ public db_sql_selectTpRecordHoldersCallback2(Handle:owner, Handle:hndl, const St
 	if(SQL_HasResultSet(hndl) && SQL_FetchRow(hndl))
 	{
 		decl String:szName[MAX_NAME_LENGTH];
+		decl String:szSteamID[32];
 		decl String:szRecords[64];
 		decl String:szValue[128];
 		new Handle:pack = data;
 		ResetPack(pack);
 		new client = ReadPackCell(pack);      
-		ReadPackString(pack, szRecords, 64);		
+		ReadPackString(pack, szRecords, 64);	
 		new count = ReadPackCell(pack); 
+		ReadPackString(pack, szSteamID, 32);
 		CloseHandle(pack);
 		SQL_FetchString(hndl, 1, szName, MAX_NAME_LENGTH);
 		Format(szValue, 128, "      %s       »  %s",szRecords, szName);
-		AddMenuItem(g_hTopJumpersMenu[client], szValue, szValue, ITEMDRAW_DEFAULT);
+		AddMenuItem(g_hTopJumpersMenu[client], szSteamID, szValue, ITEMDRAW_DEFAULT);
 		if (count==1)
 		{
 			SetMenuOptionFlags(g_hTopJumpersMenu[client], MENUFLAG_BUTTON_EXIT);
@@ -4554,8 +4754,8 @@ public db_selectTopPlayers(client)
 public db_selectTop100PlayersCallback(Handle:owner, Handle:hndl, const String:error[], any:data)
 {       
 	new client = data;
-	decl String:szValue[64];
-	decl String:szName[MAX_NAME_LENGTH];
+	decl String:szValue[128];
+	decl String:szName[64];
 	decl String:szRank[16];
 	decl String:szSteamID[32];
 	decl String:szPerc[16];
@@ -4568,7 +4768,7 @@ public db_selectTop100PlayersCallback(Handle:owner, Handle:hndl, const String:er
 		new i = 1;
 		while (SQL_FetchRow(hndl))
 		{	
-			SQL_FetchString(hndl, 0, szName, MAX_NAME_LENGTH);
+			SQL_FetchString(hndl, 0, szName, 64);
 			if (i==100)
 				Format(szRank, 16, "[%i.]",i);
 			else
@@ -4598,21 +4798,21 @@ public db_selectTop100PlayersCallback(Handle:owner, Handle:hndl, const String:er
 						Format(szPerc, 16, "%.1f%c  ",fperc,PERCENT);
 						
 			if (points  < 10)
-				Format(szValue, 64, "%s      %ip       %s     » %s",szRank, points, szPerc,szName);
+				Format(szValue, 128, "%s      %ip       %s     » %s",szRank, points, szPerc,szName);
 			else
 				if (points  < 100)
-					Format(szValue, 64, "%s     %ip       %s     » %s",szRank, points, szPerc,szName);		
+					Format(szValue, 128, "%s     %ip       %s     » %s",szRank, points, szPerc,szName);		
 				else
 					if (points  < 1000)
-						Format(szValue, 64, "%s   %ip       %s     » %s",szRank, points, szPerc,szName);		
+						Format(szValue, 128, "%s   %ip       %s     » %s",szRank, points, szPerc,szName);		
 					else
 						if (points  < 10000)
-							Format(szValue, 64, "%s %ip       %s     » %s",szRank, points, szPerc,szName);	
+							Format(szValue, 128, "%s %ip       %s     » %s",szRank, points, szPerc,szName);	
 						else
 							if (points  < 100000)
-								Format(szValue, 64, "%s %ip     %s     » %s",szRank, points, szPerc,szName);	
+								Format(szValue, 128, "%s %ip     %s     » %s",szRank, points, szPerc,szName);	
 							else
-								Format(szValue, 64, "%s %ip   %s     » %s",szRank, points, szPerc,szName);	
+								Format(szValue, 128, "%s %ip   %s     » %s",szRank, points, szPerc,szName);	
 			
 			AddMenuItem(menu, szSteamID, szValue, ITEMDRAW_DEFAULT);
 			i++;

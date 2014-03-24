@@ -860,7 +860,7 @@ public PerformBan(client)
 			db_InsertBan(szSteamID, szName);
 		new bantime= RoundToZero(g_fBanDuration*60);
 		decl String:banmsg[255];
-		Format(banmsg, sizeof(banmsg), "KZ AntiCheat: You were banned for using cheats (%.0fh)",g_fBanDuration); 
+		Format(banmsg, sizeof(banmsg), "KZ AntiCheat: You were banned for using a BhopHack (%.0fh)",g_fBanDuration); 
 		BanClient(client, bantime, BANFLAG_AUTO, banmsg, banmsg);
 		db_DeleteCheater(client,szSteamID);
 	}
