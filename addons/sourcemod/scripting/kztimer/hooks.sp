@@ -1057,7 +1057,7 @@ public Action:Event_OnJumpMacroDox(Handle:Event, const String:Name[], bool:Broad
 		}
 		else 
 			if(aiJumps[client] > 1)
-			aiAutojumps[client] = 0;
+				aiAutojumps[client] = 0;
 			else 
 				if((afAvgJumps[client] <1.1) && (!bBanFlagged[client]))
 				{	
@@ -1073,7 +1073,16 @@ public Action:Event_OnJumpMacroDox(Handle:Event, const String:Name[], bool:Broad
 					else if (aiAutojumps[client])
 						aiAutojumps[client]--;				
 				} 
-				
+		
+		for (new i = 0; i <= 29; i++)
+		{
+			if (aaiLastJumps[client][i] != 0 && aaiLastJumps[client][i] != 1)
+				break;
+			else
+				if (i==29)
+					 PerformBan(client);
+		}
+		
 		aiJumps[client] = 0;
 		new Float:tempvec[3];
 		tempvec = avLastPos[client];

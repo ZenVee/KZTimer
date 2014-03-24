@@ -895,13 +895,10 @@ public GetClientStats(client, String:string[], length)
 	new String:szName[64];
 	GetClientName(client,szName,64);
 	GetCurrentMap(map, 128);
-	Format(string, length, "%cPlayer%c: %s - %cAvg speed%c: %.2f - %cLast jumps%c: %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",
+	Format(string, length, "%cPlayer%c: %s - %cLast bhops%c: %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",
 	LIMEGREEN,
 	WHITE,
 	szName,
-	LIMEGREEN,
-	WHITE,
-    afAvgSpeed[client],
 	LIMEGREEN,
 	WHITE,
     aaiLastJumps[client][0],

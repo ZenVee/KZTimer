@@ -509,7 +509,7 @@ new String:g_sRecordName[MAXPLAYERS+1][MAX_RECORD_NAME_LENGTH];
 	
 public Plugin:
 myinfo = {
-	name = "kztimer",
+	name = "KZTimer",
 	author = "1NutWunDeR",
 	description = "",
 	version = VERSION,
@@ -1182,6 +1182,12 @@ public OnClientPostAdminCheck(client)
 	db_viewPersonalDropBhopRecord(client, szSteamId); 
 	db_viewPersonalLJRecord(client, szSteamId);
 	db_viewPlayerOptions(client, szSteamId);	
+	new i;
+	while (i < 30)
+	{
+		aaiLastJumps[client][i] = -1;
+		i++;
+	}
 	
 	//Restore time&position
 	if(g_bRestore)
@@ -1315,7 +1321,7 @@ public OnClientDisconnect(client)
 	new i;
 	while (i < 30)
 	{
-		aaiLastJumps[client][i] = 0;
+		aaiLastJumps[client][i] = -1;
 		i++;
 	}	
 }

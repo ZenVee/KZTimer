@@ -1939,7 +1939,7 @@ public HelpPanel(client)
 	DrawPanelText(panel, "!options - player options");
 	DrawPanelText(panel, "!top - top players/records");
 	DrawPanelText(panel, "!profile [<name>] - shows a player profile");
-	DrawPanelText(panel, "!checkpoint / !gocheck - save location / teleport to location");
+	DrawPanelText(panel, "!checkpoint / !gocheck - save / teleport");
 	DrawPanelText(panel, "!prev / !next - previous or next checkpoint");
 	DrawPanelText(panel, "!undo - undoes your last teleport");
 	DrawPanelText(panel, " ");
@@ -2010,7 +2010,7 @@ public HelpPanel3(client)
 	Format(szTmp, 64, "KZ Timer Help (3/3) - v%s",VERSION);
 	DrawPanelText(panel, szTmp);
 	DrawPanelText(panel, " ");
-	DrawPanelText(panel, "!bhopcheck <name> - bunnyhop check (anticheat)");
+	DrawPanelText(panel, "!bhopcheck <name> - bunnyhop check (anticheat, 0-1 = perfect)");
 	DrawPanelText(panel, " ");
 	DrawPanelText(panel, "Advice: Deactivate your mouse acceleration");
 	DrawPanelText(panel, "and enable rawinput in your game options");
