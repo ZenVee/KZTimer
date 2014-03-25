@@ -2011,7 +2011,7 @@ public HelpPanel3(client)
 	Format(szTmp, 64, "KZ Timer Help (3/3) - v%s",VERSION);
 	DrawPanelText(panel, szTmp);
 	DrawPanelText(panel, " ");
-	DrawPanelText(panel, "!bhopcheck <name> - bunnyhop check (anticheat, 0-1 = perfect)");
+	DrawPanelText(panel, "!bhopcheck <name> - bunnyhop check (1 = perfect jump off)");
 	DrawPanelText(panel, " ");
 	DrawPanelText(panel, "Advice: Deactivate your mouse acceleration");
 	DrawPanelText(panel, "and enable rawinput in your game options");

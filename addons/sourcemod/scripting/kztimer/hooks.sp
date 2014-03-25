@@ -1043,7 +1043,7 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 public Action:Event_OnJumpMacroDox(Handle:Event, const String:Name[], bool:Broadcast)
 {
 	new client = GetClientOfUserId(GetEventInt(Event, "userid"));
-	if(IsClientInGame(client) && g_bBhopHackProtection && !IsFakeClient(client))
+	if(IsClientInGame(client) && !IsFakeClient(client))
 	{	
 		afAvgJumps[client] = ( afAvgJumps[client] * 9.0 + float(aiJumps[client]) ) / 10.0;  
 		decl Float:vec_vel[3];
@@ -1061,7 +1061,8 @@ public Action:Event_OnJumpMacroDox(Handle:Event, const String:Name[], bool:Broad
 			{
 				aiPatternhits[client]++;
 				if ((aiPatternhits[client] > 15) && (!bBanFlagged[client]))
-					PerformBan(client);
+					if (g_bBhopHackProtection)
+						PerformBan(client);
 			}
 			else 
 				if ((aiPatternhits[client] > 0) && (aiJumps[client] != aiPattern[client]))
@@ -1085,7 +1086,8 @@ public Action:Event_OnJumpMacroDox(Handle:Event, const String:Name[], bool:Broad
 					{
 						aiAutojumps[client]++;
 						if (aiAutojumps[client] >= 20)
-							PerformBan(client);
+							if (g_bBhopHackProtection)
+								PerformBan(client);
 					}
 					else if (aiAutojumps[client])
 						aiAutojumps[client]--;				
@@ -1097,7 +1099,8 @@ public Action:Event_OnJumpMacroDox(Handle:Event, const String:Name[], bool:Broad
 				break;
 			else
 				if (i==29)
-					 PerformBan(client);
+					if (g_bBhopHackProtection)
+						PerformBan(client);
 		}
 		
 		aiJumps[client] = 0;
@@ -1109,8 +1112,9 @@ public Action:Event_OnJumpMacroDox(Handle:Event, const String:Name[], bool:Broad
 		if (len < 30.0)  
 			aiIgnoreCount[client] = 2;
 		
-		if (afAvgPerfJumps[client] >= 0.94 && !bBanFlagged[client])						
-			 PerformBan(client);
+		if (afAvgPerfJumps[client] >= 0.94 && !bBanFlagged[client])		
+			if (g_bBhopHackProtection)
+				PerformBan(client);
 	}
 }
 
