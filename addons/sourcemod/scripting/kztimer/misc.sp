@@ -885,6 +885,11 @@ public PerformStats(client, target)
 	GetClientStats(target, banstats, sizeof(banstats));
 	PrintToChat(client, "[%cKZ%c] %s",MOSSGREEN,WHITE,banstats);
 	PrintToConsole(client, "[KZ] %s",banstats);
+	if (g_bAutoBhop2)
+	{
+		PrintToChat(client, "[%cKZ%c] AutoBhop enabled",MOSSGREEN,WHITE);
+		PrintToConsole(client, "[KZ] AutoBhop enabled");
+	}
 }
 
 //MACRODOX BHOP PROTECTION
@@ -895,7 +900,7 @@ public GetClientStats(client, String:string[], length)
 	new String:szName[64];
 	GetClientName(client,szName,64);
 	GetCurrentMap(map, 128);
-	Format(string, length, "%cPlayer%c: %s - %cLast bhops%c: %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",
+	Format(string, length, "%cPlayer%c: %s - %cLast bhops%c: %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",	
 	LIMEGREEN,
 	WHITE,
 	szName,
