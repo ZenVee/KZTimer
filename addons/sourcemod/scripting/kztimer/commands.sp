@@ -1226,7 +1226,7 @@ public Action:Client_GoTo(client, args)
 			new playerCount=0;
 			for (new i = 1; i <= MaxClients; i++)
 			{
-				if (IsValidEntity(i) && IsClientInGame(i) && IsPlayerAlive(i) && i != client )
+				if (IsValidEntity(i) && IsClientInGame(i) && IsPlayerAlive(i) && i != client && !IsFakeClient(client))
 				{
 					GetClientName(i, szPlayerName, MAX_NAME_LENGTH);	
 					AddMenuItem(menu, szPlayerName, szPlayerName);	
@@ -1764,7 +1764,6 @@ public ClimbersMenuHandler(Handle:menu, MenuAction:action, param1, param2)
 public TopMenu(client)
 {
 	detailView[client]=-1;
-	g_TopMenuLastPage[client] = 0;
 	g_bTopMenuOpen[client]=true;
 	g_bClimbersMenuOpen[client]=false;
 	new Handle:topmenu = CreateMenu(TopMenuHandler);

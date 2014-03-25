@@ -1738,14 +1738,14 @@ public SQL_ViewAllRecordsCallback(Handle:owner, Handle:hndl, const String:error[
 						bHeader=true;
 						PrintToChat(client, "%t", "ConsoleOutput", LIMEGREEN,WHITE); 	
 					}
-					new Handle:pack = CreateDataPack();
-					WritePackCell(pack, client);
+					new Handle:pack = CreateDataPack();			
 					WritePackString(pack, szName);
 					WritePackString(pack, szSteamId);
-					WritePackString(pack, szMapName);
-					WritePackFloat(pack, time);
+					WritePackString(pack, szMapName);			
 					WritePackString(pack, szRecord_type);
+					WritePackFloat(pack, time);
 					WritePackCell(pack, teleports);
+					WritePackCell(pack, client);
 					
 					if (teleports > 0)
 						Format(szQuery, 512, sql_selectPlayerRankTime, szSteamId, szMapName, szMapName);
@@ -1772,14 +1772,12 @@ public SQL_ViewAllRecordsCallback2(Handle:owner, Handle:hndl, const String:error
 		new Handle:pack = data;
 		WritePackCell(pack, rank);
 		ResetPack(pack);
-		new client = ReadPackCell(pack);
 		decl String:szName[MAX_NAME_LENGTH];
 		ReadPackString(pack, szName, MAX_NAME_LENGTH);
 		decl String:szSteamId[32];
 		ReadPackString(pack, szSteamId, 32);
 		decl String:szMapName[MAX_MAP_LENGTH];
 		ReadPackString(pack, szMapName, MAX_MAP_LENGTH);
-		new Float:time = ReadPackFloat(pack);
 		decl String:szRecord_type[4];
 		ReadPackString(pack, szRecord_type, 4);	
 		new teleports = ReadPackCell(pack);
@@ -1800,18 +1798,20 @@ public SQL_ViewAllRecordsCallback3(Handle:owner, Handle:hndl, const String:error
 		new count = SQL_GetRowCount(hndl);
 		new Handle:pack = data;
 		ResetPack(pack);
-		new client = ReadPackCell(pack);
+		
 		decl String:szName[MAX_NAME_LENGTH];
 		ReadPackString(pack, szName, MAX_NAME_LENGTH);
 		decl String:szSteamId[32];
 		ReadPackString(pack, szSteamId, 32);
 		decl String:szMapName[MAX_MAP_LENGTH];
-		ReadPackString(pack, szMapName, MAX_MAP_LENGTH);
-		new Float:time = ReadPackFloat(pack);
+		ReadPackString(pack, szMapName, MAX_MAP_LENGTH);	
 		decl String:szRecord_type[4];
-		ReadPackString(pack, szRecord_type, 4);		
+		ReadPackString(pack, szRecord_type, 4);	
+		new Float:time = ReadPackFloat(pack);		
 		new teleports = ReadPackCell(pack);
+		new client = ReadPackCell(pack);
 		new rank = ReadPackCell(pack);
+		
 		CloseHandle(pack);
 		FormatTimeFloat(client,time,3);
 		PrintToConsole(client,"%s, Time: %s (%s), Teleports: %i, Rank: %i/%i", szMapName, g_szTime[client], szRecord_type, teleports,rank,count);
@@ -1854,15 +1854,16 @@ public SQL_ViewRankedPlayerCallback(Handle:owner, Handle:hndl, const String:erro
 		SQL_FetchString(hndl, 8, szCountry, 100);
 		
 		new Handle:pack_pr = CreateDataPack();
-		WritePackCell(pack_pr, client);
+		
 		WritePackString(pack_pr, szName);
-		WritePackString(pack_pr, szSteamId);
+		WritePackString(pack_pr, szSteamId);	
+		WritePackCell(pack_pr, client);		
 		WritePackCell(pack_pr, points);
 		WritePackCell(pack_pr, finishedmapstp);
 		WritePackCell(pack_pr, finishedmapspro);
 		WritePackCell(pack_pr, wonc);
 		WritePackCell(pack_pr, pointsc);
-		WritePackString(pack_pr, szCountry);
+		WritePackString(pack_pr, szCountry);	
 		Format(szQuery, 512, sql_selectRankedPlayersRank, szSteamId);
 		SQL_TQuery(g_hDb, SQL_ViewRankedPlayerCallback2, szQuery, pack_pr);
 	}
@@ -1879,10 +1880,9 @@ public SQL_ViewRankedPlayerCallback2(Handle:owner, Handle:hndl, const String:err
 		new rank = SQL_GetRowCount(hndl);
 		new Handle:pack_pr = data;
 		WritePackCell(pack_pr, rank);
-		ResetPack(pack_pr);
-		new client = ReadPackCell(pack_pr);         
+		ResetPack(pack_pr);	        
 		ReadPackString(pack_pr, szName, MAX_NAME_LENGTH);
-		ReadPackString(pack_pr, szSteamId, 32);		
+		ReadPackString(pack_pr, szSteamId, 32);	
 		Format(szQuery, 512, sql_selectTpRecordCount, szSteamId);
 		SQL_TQuery(g_hDb, SQL_ViewRankedPlayerCallback3, szQuery, pack_pr);	
 	}
@@ -1894,10 +1894,10 @@ public SQL_ViewRankedPlayerCallback3(Handle:owner, Handle:hndl, const String:err
 	decl String:szQuery[512];
 	decl String:szSteamId[32];
 	decl String:szName[MAX_NAME_LENGTH];
-	ResetPack(pack_pr);
-	new client = ReadPackCell(pack_pr);            
+	ResetPack(pack_pr);	        
 	ReadPackString(pack_pr, szName, MAX_NAME_LENGTH);
 	ReadPackString(pack_pr, szSteamId, 32);	
+	new client = ReadPackCell(pack_pr);    
 	if(SQL_HasResultSet(hndl) && SQL_FetchRow(hndl)) 
 		g_tprecords[client] = SQL_FetchInt(hndl, 1);	//pack full?´
 	Format(szQuery, 512, sql_selectProRecordCount, szSteamId);
@@ -1910,10 +1910,10 @@ public SQL_ViewRankedPlayerCallback4(Handle:owner, Handle:hndl, const String:err
 	decl String:szSteamId[32];
 	decl String:szName[MAX_NAME_LENGTH];
 	new Handle:pack_pr = data;
-	ResetPack(pack_pr);
-	new client = ReadPackCell(pack_pr);         
+	ResetPack(pack_pr);       
 	ReadPackString(pack_pr, szName, MAX_NAME_LENGTH);
 	ReadPackString(pack_pr, szSteamId, 32);		
+	new client = ReadPackCell(pack_pr);  
 	if(SQL_HasResultSet(hndl) && SQL_FetchRow(hndl)) 
 		g_prorecords[client] = SQL_FetchInt(hndl, 1);	//pack full?
 	Format(szQuery, 512, sql_selectChallenges, szSteamId,szSteamId);
@@ -1933,10 +1933,10 @@ public SQL_ViewRankedPlayerCallback5(Handle:owner, Handle:hndl, const String:err
 	decl String:szCountry[100];
 	decl String:szNextRank[32];
 	decl String:szSkillGroup[32];
-	ResetPack(pack_pr);
-	new client = ReadPackCell(pack_pr);            
+	ResetPack(pack_pr);     
 	ReadPackString(pack_pr, szName, MAX_NAME_LENGTH);
 	ReadPackString(pack_pr, szSteamId, 32);
+	new client = ReadPackCell(pack_pr);       
 	new points = ReadPackCell(pack_pr);
 	new finishedmapstp = ReadPackCell(pack_pr);
 	new finishedmapspro = ReadPackCell(pack_pr);  
@@ -2112,12 +2112,12 @@ public SQL_ViewRecordCallback(Handle:owner, Handle:hndl, const String:error[], a
 		time = SQL_FetchFloat(hndl, 3);
 		timepro = SQL_FetchFloat(hndl, 4);      
 		teleports = SQL_FetchInt(hndl, 5);
-		new Handle:pack1 = CreateDataPack();
-		WritePackCell(pack1, client);
+		new Handle:pack1 = CreateDataPack();		
 		WritePackString(pack1, szMapName);
-		WritePackString(pack1, szSteamId);
-		WritePackString(pack1, szName);
+		WritePackString(pack1, szSteamId);	
+		WritePackString(pack1, szName);	
 		WritePackFloat(pack1, time);
+		WritePackCell(pack1, client);
 		WritePackFloat(pack1, timepro);
 		WritePackCell(pack1, teleports);
 		
@@ -2147,8 +2147,7 @@ public SQL_ViewRecordCallback2(Handle:owner, Handle:hndl, const String:error[], 
 	new rank = SQL_GetRowCount(hndl);
 	new Handle:pack2 = data;
 	WritePackCell(pack2, rank);
-	ResetPack(pack2);
-	new client = ReadPackCell(pack2);
+	ResetPack(pack2);	
 	decl String:szMapName[MAX_MAP_LENGTH];
 	ReadPackString(pack2, szMapName, MAX_MAP_LENGTH);
 	decl String:szSteamId[32];
@@ -2174,15 +2173,15 @@ public SQL_ViewRecordCallback3(Handle:owner, Handle:hndl, const String:error[], 
 	{
 		new count1 = SQL_GetRowCount(hndl);
 		new Handle:pack3 = data;
-		ResetPack(pack3);
-		new client = ReadPackCell(pack3);
+		ResetPack(pack3);		
 		decl String:szMapName[MAX_MAP_LENGTH];
 		ReadPackString(pack3, szMapName, MAX_MAP_LENGTH);
 		decl String:szSteamId[32];
 		ReadPackString(pack3, szSteamId, 32);
 		decl String:szName[MAX_NAME_LENGTH];
-		ReadPackString(pack3, szName, MAX_NAME_LENGTH);
+		ReadPackString(pack3, szName, MAX_NAME_LENGTH);	
 		new Float:time = ReadPackFloat(pack3);
+		new client = ReadPackCell(pack3);
 		new Float:timepro = ReadPackFloat(pack3);
 		new teleports = ReadPackCell(pack3);
 		new rank = ReadPackCell(pack3);
@@ -2268,7 +2267,6 @@ public SQL_ViewRecordCallback4(Handle:owner, Handle:hndl, const String:error[], 
 		new Handle:pack4 = data;
 		WritePackCell(pack4, rankPro);
 		ResetPack(pack4);
-		new client = ReadPackCell(pack4);
 		decl String:szMapName[MAX_MAP_LENGTH];
 		ReadPackString(pack4, szMapName, MAX_MAP_LENGTH);
 		Format(szQuery, 512, sql_selectPlayerProCount, szMapName);
@@ -2285,14 +2283,14 @@ public SQL_ViewRecordCallback5(Handle:owner, Handle:hndl, const String:error[], 
 		//retrieve all values
 		new Handle:pack5 = data;
 		ResetPack(pack5);            
-		new client = ReadPackCell(pack5);
 		decl String:szMapName[MAX_MAP_LENGTH];
 		ReadPackString(pack5, szMapName, MAX_MAP_LENGTH);
 		decl String:szSteamId[32];
 		ReadPackString(pack5, szSteamId, 32);
 		decl String:szName[MAX_NAME_LENGTH];
-		ReadPackString(pack5, szName, MAX_NAME_LENGTH);
+		ReadPackString(pack5, szName, MAX_NAME_LENGTH);	
 		new Float:time = ReadPackFloat(pack5);
+		new client = ReadPackCell(pack5);
 		new Float:timepro = ReadPackFloat(pack5);
 		new teleports = ReadPackCell(pack5);
 		new rank = ReadPackCell(pack5);                  

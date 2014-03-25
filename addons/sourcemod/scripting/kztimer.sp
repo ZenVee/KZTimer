@@ -11,7 +11,7 @@
 #include <geoip>
 #include <colors>
 #undef REQUIRE_EXTENSIONS
-#define VERSION "1.11 Nightly #6"
+#define VERSION "1.12 Nightly"
 #define ADMIN_LEVEL ADMFLAG_UNBAN
 #define WHITE 0x01
 #define DARKRED 0x02
@@ -398,7 +398,6 @@ new g_pr_oldpoints[MAX_PR_PLAYERS];
 new g_pr_multiplier[MAX_PR_PLAYERS]; 
 new g_pr_finishedmaps_tp[MAX_PR_PLAYERS]; 
 new g_pr_finishedmaps_pro[MAX_PR_PLAYERS];
-new g_TopMenuLastPage[MAXPLAYERS+1] 
 new detailView[MAXPLAYERS+1];
 new g_CBet[MAXPLAYERS+1];
 new g_UspDrops[MAXPLAYERS+1];
