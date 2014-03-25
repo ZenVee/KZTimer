@@ -1,7 +1,12 @@
 https://forums.alliedmods.net/showthread.php?t=223274
-Changelog (>1.1 stable)
+Changelog
 =======
 
+v1.1
+- replay bot: replaced hk2000 with usp silencer
+- removed "usp is slower than knife.." msg when kz_prestrafe is enabled
+ 
+v1.11
 - added kz_fps_check 1 to settings enforcer (0 < fps_max <= 300) - 10sec warning on spawn
 - added height to bhop, multibhop, dropbhop & wj jumpstats msg's
 - new db table: playeroptions2 replaces playeroptions
