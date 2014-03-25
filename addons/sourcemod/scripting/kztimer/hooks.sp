@@ -1042,8 +1042,8 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 
 public Action:Event_OnJumpMacroDox(Handle:Event, const String:Name[], bool:Broadcast)
 {
-	new client = GetClientOfUserId(GetEventInt(Event, "userid"));
-	if(IsClientInGame(client) && !IsFakeClient(client))
+	new client = GetClientOfUserId(GetEventInt(Event, "userid"));	
+	if(IsClientInGame(client) && !IsFakeClient(client) && !g_bAutoBhop2)
 	{	
 		afAvgJumps[client] = ( afAvgJumps[client] * 9.0 + float(aiJumps[client]) ) / 10.0;  
 		decl Float:vec_vel[3];
