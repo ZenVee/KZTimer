@@ -1093,7 +1093,8 @@ public Action:Event_OnJumpMacroDox(Handle:Event, const String:Name[], bool:Broad
 						aiAutojumps[client]--;				
 				} 
 		
-		for (new i = 0; i <= 29; i++)
+		//causing probably wrong detections
+		/*for (new i = 0; i <= 29; i++)
 		{
 			if (aaiLastJumps[client][i] != 0 && aaiLastJumps[client][i] != 1)
 				break;
@@ -1101,7 +1102,7 @@ public Action:Event_OnJumpMacroDox(Handle:Event, const String:Name[], bool:Broad
 				if (i==29)
 					if (g_bBhopHackProtection)
 						PerformBan(client);
-		}
+		}*/
 		
 		aiJumps[client] = 0;
 		new Float:tempvec[3];
@@ -1983,7 +1984,7 @@ public PostThinkPost(client, ground_frames)
 
 public OnEntityCreated(iEntity, const String:classname[]) 
 { 
-	if (1 <= iEntity <= MaxClients && IsClientInGame(iEntity) && !IsFakeClient(iEntity))
+	if (1 <= iEntity <= MaxClients && IsClientInGame(iEntity))
 	{	
 		if(StrEqual(classname, "player"))   
 		{
@@ -1995,7 +1996,7 @@ public OnEntityCreated(iEntity, const String:classname[])
 
 public OnTouch(client, other)
 {
-	if (IsClientInGame(client) && IsPlayerAlive(client) && !IsFakeClient(client))
+	if (IsClientInGame(client) && IsPlayerAlive(client))
 	{
 		if ((1 <= client <= MaxClients))
 		{
@@ -2009,7 +2010,7 @@ public OnTouch(client, other)
 
 public OnEndTouch(client, other)
 {
-	if (IsClientInGame(client) && IsPlayerAlive(client) && !IsFakeClient(client))
+	if (IsClientInGame(client) && IsPlayerAlive(client))
 	{
 		if ((1 <= client <= MaxClients))
 			g_bTouchWall[client] = false;
