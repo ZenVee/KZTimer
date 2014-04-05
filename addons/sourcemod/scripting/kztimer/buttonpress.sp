@@ -322,6 +322,7 @@ public CL_OnEndTimerPress(client)
 		//save replay	
 		if (g_bReplayBot)
 			CreateTimer(3.0, ProReplayTimer, client,TIMER_FLAG_NO_MAPCHANGE);
+		db_InsertLatestRecords(szSteamId, szName, g_fFinalTime[client], g_OverallTp[client]);	
 	} 
 	
 	//NEW TP RECORD
@@ -338,7 +339,7 @@ public CL_OnEndTimerPress(client)
 		//save replay	
 		if (g_bReplayBot)
 			CreateTimer(3.0, TpReplayTimer, client,TIMER_FLAG_NO_MAPCHANGE);
-			
+		db_InsertLatestRecords(szSteamId, szName, g_fFinalTime[client], g_OverallTp[client]);	
 	}
 			
 	//Challenge

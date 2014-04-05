@@ -107,16 +107,6 @@ public Action:ResetSlowdownTimer(Handle:timer, any:client)
 	g_bSlowDownCheck[client]=false;	
 }
 
-
-public Action:TriggerFPSCheck(Handle:timer)
-{
-	if (g_bfpsCheck)
-        for (new client = 1; client <= MaxClients; client++)
-			if (IsClientInGame(client) && !IsClientObserver(client))
-					QueryClientConVar(client, "fps_max", ConVarQueryFinished:FPSCheck, client);  
-	return Plugin_Continue;
-}
-
 public Action:SpawnButtons(Handle:timer)
 {
 	db_selectMapButtons();

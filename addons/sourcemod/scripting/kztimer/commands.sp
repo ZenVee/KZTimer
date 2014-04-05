@@ -925,6 +925,12 @@ public HideMethod(client)
 		g_bHide[client] = false; 
 }
 
+public Action:Client_Latest(client, args)
+{
+	db_ViewLatestRecords(client);
+	return Plugin_Handled;
+}
+
 public Action:Client_Showsettings(client, args)
 {
 	ShowSrvSettings(client);
@@ -1936,10 +1942,10 @@ public HelpPanel(client)
 	DrawPanelText(panel, " ");
 	DrawPanelText(panel, "!helpmenu - opens this menu");
 	DrawPanelText(panel, "!menu - opens climbers menu");
-	DrawPanelText(panel, "!adv - opens advanced climbers menu");	
-	DrawPanelText(panel, "!options - player options");
+	DrawPanelText(panel, "!options - player options");	
 	DrawPanelText(panel, "!top - top players/records");
-	DrawPanelText(panel, "!profile [<name>] - shows a player profile");
+	DrawPanelText(panel, "!latest - latest local records");
+	DrawPanelText(panel, "!profile [<name>] - player profile");
 	DrawPanelText(panel, "!checkpoint / !gocheck - save / teleport");
 	DrawPanelText(panel, "!prev / !next - previous or next checkpoint");
 	DrawPanelText(panel, "!undo - undoes your last teleport");
@@ -1975,7 +1981,7 @@ public HelpPanel2(client)
 	DrawPanelText(panel, "!stop - stop your map timer");
 	DrawPanelText(panel, "!pause - on/off client pause");	
 	DrawPanelText(panel, "!usp - spawns a usp");
-	DrawPanelText(panel, "!challenge - start a challenge against 1 person");	
+	DrawPanelText(panel, "!challenge - start a challenge/race against someone");	
 	DrawPanelText(panel, "!spec [<name>] - select a player you want to watch");	
 	DrawPanelText(panel, "!goto [<name>] - teleports you to a selected player");
 	DrawPanelText(panel, "!compare [<name>] - compare your challenge results");
@@ -2011,16 +2017,14 @@ public HelpPanel3(client)
 	Format(szTmp, 64, "KZ Timer Help (3/3) - v%s",VERSION);
 	DrawPanelText(panel, szTmp);
 	DrawPanelText(panel, " ");
-	DrawPanelText(panel, "!bhopcheck <name> - bunnyhop check (1 = perfect jump off)");
+	DrawPanelText(panel, "!bhopcheck <name> - bunnyhop check (1 = perfect take off)");
 	DrawPanelText(panel, " ");
-	DrawPanelText(panel, "Advice: Deactivate your mouse acceleration");
-	DrawPanelText(panel, "and enable rawinput in your game options");
-	DrawPanelText(panel, " ");
+	DrawPanelText(panel, "Useful binds:");
 	Format(szTmp, 64, "Flashlight: bind KEY %cimpulse 100%c", QUOTE,QUOTE);
 	DrawPanelText(panel, szTmp);	
 	Format(szTmp, 64, "NoClip: bind KEY %c+noclip%c", QUOTE,QUOTE);
 	DrawPanelText(panel, szTmp);	
-	Format(szTmp, 64, "Start: bind KEY %csm_start%c (missing in adv menu)", QUOTE,QUOTE);
+	Format(szTmp, 64, "Start: bind KEY %csm_start%c", QUOTE,QUOTE);
 	DrawPanelText(panel, szTmp);	
 	DrawPanelText(panel, " ");
 	Format(szTmp, 64, "Skill groups: Novice (%ip), Scrub (%ip), Rookie (%ip),", g_pr_rank_Novice,g_pr_rank_Scrub,g_pr_rank_Rookie);

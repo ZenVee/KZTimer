@@ -76,8 +76,8 @@ public MRESReturn:DHooks_OnTeleport(client, Handle:hParams)
 		iAT[_:atFlags] |= ADDITIONAL_FIELD_TELEPORTED_ANGLES;
 	if(!bVelocityNull)
 		iAT[_:atFlags] |= ADDITIONAL_FIELD_TELEPORTED_VELOCITY;
-	
-	PushArrayArray(g_hRecordingAdditionalTeleport[client], iAT, AT_SIZE);
+	if (g_hRecordingAdditionalTeleport[client] != INVALID_HANDLE)
+		PushArrayArray(g_hRecordingAdditionalTeleport[client], iAT, AT_SIZE);
 	
 	return MRES_Ignored;
 }
@@ -479,22 +479,16 @@ public LoadReplayTp()
 public StopPlayerMimic(client)
 {
 	if(client < 1 || client > MaxClients || !IsClientInGame(client))
-	{
-		ThrowNativeError(SP_ERROR_NATIVE, "Bad player index %d", client);
 		return;
-	}
-	
-	if(!IsPlayerMimicing(client))
-	{
-		ThrowNativeError(SP_ERROR_NATIVE, "Player is not mimicing.");
-		return;
-	}
-	g_hBotMimicsRecord[client] = INVALID_HANDLE;
 	g_iBotMimicTick[client] = 0;
 	g_iCurrentAdditionalTeleportIndex[client] = 0;
 	g_iBotMimicRecordTickCount[client] = 0;
 	g_bValidTeleportCall[client] = false;
-	SDKUnhook(client, SDKHook_WeaponCanSwitchTo, Hook_WeaponCanSwitchTo);
+	if(g_hBotMimicsRecord[client] != INVALID_HANDLE)
+	{
+		SDKUnhook(client, SDKHook_WeaponCanSwitchTo, Hook_WeaponCanSwitchTo);
+		g_hBotMimicsRecord[client] = INVALID_HANDLE;
+	}	
 }
 
 public IsPlayerMimicing(client)

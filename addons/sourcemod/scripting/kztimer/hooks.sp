@@ -42,8 +42,9 @@ public Action:Event_OnPlayerSpawn(Handle:event, const String:name[], bool:dontBr
 		}
 		//fps Check
 		if (g_bfpsCheck)
+		{
 			QueryClientConVar(client, "fps_max", ConVarQueryFinished:FPSCheck, client);		
-		
+		}
 		//player skin
 		if (g_bPlayerSkinChange && (GetClientTeam(client) > 1))
 		{
@@ -367,13 +368,14 @@ public Action:OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
  //fpscheck
 public FPSCheck(QueryCookie:cookie, client, ConVarQueryResult:result, const String:cvarName[], const String:cvarValue[])
 {
-	if (IsClientConnected(client) && !IsFakeClient(client))
+	if (IsClientConnected(client) && !IsFakeClient(client) && !g_bKickStatus[client])
 	{
 		new fps_max = StringToInt(cvarValue);        
 		if (fps_max < 100 || fps_max > 300)
 		{
 			CreateTimer(10.0, KickPlayer, client, TIMER_FLAG_NO_MAPCHANGE);
 			PrintToChat(client, "%t", "KickMsg", DARKRED,WHITE,RED,WHITE,fps_max);
+			g_bKickStatus[client]=true;
 		}
 	}
 }
@@ -430,7 +432,7 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 		///
 		// REPLAY BOT: RECORDING
 		///
-		if(g_hRecording[client] != INVALID_HANDLE && !IsFakeClient(client))
+		if(g_hRecording[client] != INVALID_HANDLE && !IsFakeClient(client) && IsPlayerAlive(client))
 		{
 			new iFrame[FRAME_INFO_SIZE];
 			iFrame[playerButtons] = buttons;
@@ -979,7 +981,7 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 		// landed?		
 		if(GetEntityFlags(client) & FL_ONGROUND && !g_bInvalidGround[client] && !g_bLastInvalidGround[client] && g_bPlayerJumped[client] == true && weapon != -1 && IsValidEntity(weapon) && GetEntProp(client, Prop_Data, "m_nWaterLevel") < 1)
 		{		
-			if (g_bJumpStats)
+			if (g_bJumpStats && !g_bKickStatus[client])
 				Postthink(client);
 		}
 			
@@ -1364,7 +1366,7 @@ public Postthink(client)
 			return;
 		}
 		//block invalid bot distances (has something to do with the ground-detection of the replay bot) WORKAROUND
-		if (IsFakeClient(client) && g_fJump_Distance[client] > (g_dist_leet_lj * 1.05))
+		if (IsFakeClient(client) && g_fJump_Distance[client] > (g_dist_leet_lj * 1.03))
 		{
 			PostThinkPost(client, ground_frames);
 			return;

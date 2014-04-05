@@ -11,7 +11,7 @@
 #include <geoip>
 #include <colors>
 #undef REQUIRE_EXTENSIONS
-#define VERSION "1.11"
+#define VERSION "1.13"
 #define ADMIN_LEVEL ADMFLAG_UNBAN
 #define WHITE 0x01
 #define DARKRED 0x02
@@ -320,6 +320,7 @@ new bool:g_bClimbersMenuOpen2[MAXPLAYERS+1];
 new bool:g_bNoClip[MAXPLAYERS+1]; 
 new bool:g_bMapFinished[MAXPLAYERS+1]; 
 new bool:g_bRespawnPosition[MAXPLAYERS+1]; 
+new bool:g_bKickStatus[MAXPLAYERS+1]; 
 new bool:g_bManualRecalc; 
 new bool:g_bSelectProfile[MAXPLAYERS+1]; 
 new bool:g_bClimbersMenuwasOpen[MAXPLAYERS+1]; 
@@ -431,6 +432,7 @@ new g_strafecount[MAXPLAYERS+1];
 new g_Strafes[MAXPLAYERS+1];
 new g_MVPStars[MAXPLAYERS+1];
 new g_AdminMenuLastPage[MAXPLAYERS+1];
+new Handle:g_hRecordingAdditionalTeleport[MAXPLAYERS+1];
 new g_OptionMenuLastPage[MAXPLAYERS+1];
 new g_LeetJumpDominating[MAXPLAYERS+1]; 
 new g_multi_bhop_count[MAXPLAYERS+1];
@@ -484,7 +486,6 @@ new String:BlockedChatText[][] = {"!knife","!help","!bhop","!usp","!helpmenu","!
 // http://forums.alliedmods.net/showthread.php?t=164148
 new Handle:g_hBotMimicsRecord[MAXPLAYERS+1] = {INVALID_HANDLE,...};
 new Handle:g_hRecording[MAXPLAYERS+1];
-new Handle:g_hRecordingAdditionalTeleport[MAXPLAYERS+1];
 new Handle:g_hLoadedRecordsAdditionalTeleport;
 new Float:g_fInitialPosition[MAXPLAYERS+1][3];
 new Float:g_fInitialAngles[MAXPLAYERS+1][3];
@@ -536,15 +537,15 @@ public OnPluginStart()
 	else
 		g_btickrate64=true;
 			
-	g_hReplayBot = CreateConVar("kz_replay_bot", "1", "on/off - Bots mimic the local tp and pro record (advice: rcon sv_cheats 1 and cl_draw_only_deathnotices 1 if you record a video)", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_hReplayBot = CreateConVar("kz_replay_bot", "0", "on/off - Bots mimic the local tp and pro record (advice: rcon sv_cheats 1 and cl_draw_only_deathnotices 1 if you record a video)", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	g_bReplayBot     = GetConVarBool(g_hReplayBot);
 	HookConVarChange(g_hReplayBot, OnSettingChanged);	
 	
-	g_hPreStrafe = CreateConVar("kz_prestrafe", "1", "on/off - Prestrafe + USP-Speed 250.0 (Experimental: Disable this function if your server crashes without errorlogs.)", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_hPreStrafe = CreateConVar("kz_prestrafe", "0", "on/off - Prestrafe + USP-Speed 250.0 (Experimental: Disable this function if your server crashes without errorlogs.)", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	g_bPreStrafe     = GetConVarBool(g_hPreStrafe);
 	HookConVarChange(g_hPreStrafe, OnSettingChanged);	
 
-	g_hForceJumpPenalty = CreateConVar("kz_force_jump_penalty", "0", "on/off - Force jump penalty for players (iceskating fix)", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_hForceJumpPenalty = CreateConVar("kz_force_jump_penalty", "0", "on/off - Forces player jump penalty (iceskating fix)", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	g_bForceJumpPenalty     = GetConVarBool(g_hForceJumpPenalty);
 	HookConVarChange(g_hForceJumpPenalty, OnSettingChanged);	
 	
@@ -670,8 +671,8 @@ public OnPluginStart()
 		}
 		else
 		{
-			g_hdist_pro_lj   	= CreateConVar("kz_dist_pro_lj", "253.0", "Minimum distance for longjumps to be considered pro [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 220.0, true, 999.0);
-			g_hdist_leet_lj    	= CreateConVar("kz_dist_leet_lj", "260.0", "Minimum distance for longjumps to be considered leet [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 245.0, true, 999.0);		
+			g_hdist_pro_lj   	= CreateConVar("kz_dist_pro_lj", "256.0", "Minimum distance for longjumps to be considered pro [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 220.0, true, 999.0);
+			g_hdist_leet_lj    	= CreateConVar("kz_dist_leet_lj", "262.0", "Minimum distance for longjumps to be considered leet [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 245.0, true, 999.0);		
 		}
 		g_hdist_good_weird  = CreateConVar("kz_dist_min_wj", "230.0", "Minimum distance for weird jumps to be considered good [Client Message]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 200.0, true, 999.0);
 		g_hdist_pro_weird  = CreateConVar("kz_dist_pro_wj", "265.0", "Minimum distance for weird jumps to be considered pro [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 200.0, true, 999.0);
@@ -697,8 +698,8 @@ public OnPluginStart()
 		}
 		else
 		{
-			g_hdist_pro_lj   	= CreateConVar("kz_dist_pro_lj", "255.0", "Minimum distance for longjumps to be considered pro [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 220.0, true, 999.0);
-			g_hdist_leet_lj    	= CreateConVar("kz_dist_leet_lj", "265.0", "Minimum distance for longjumps to be considered leet [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 245.0, true, 999.0);		
+			g_hdist_pro_lj   	= CreateConVar("kz_dist_pro_lj", "260.0", "Minimum distance for longjumps to be considered pro [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 220.0, true, 999.0);
+			g_hdist_leet_lj    	= CreateConVar("kz_dist_leet_lj", "266.0", "Minimum distance for longjumps to be considered leet [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 245.0, true, 999.0);		
 		}
 		g_hdist_good_weird  = CreateConVar("kz_dist_min_wj", "230.0", "Minimum distance for weird jumps to be considered good [Client Message]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 200.0, true, 999.0);
 		g_hdist_pro_weird  = CreateConVar("kz_dist_pro_wj", "270.0", "Minimum distance for weird jumps to be considered pro [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 200.0, true, 999.0);
@@ -815,6 +816,7 @@ public OnPluginStart()
 	RegConsoleCmd("sm_pause", Client_Pause);
 	RegConsoleCmd("sm_colorchat", Client_Colorchat);
 	RegConsoleCmd("sm_showsettings", Client_Showsettings);
+	RegConsoleCmd("sm_latest", Client_Latest);
 	RegConsoleCmd("sm_showtime", Client_Showtime);	
 	RegConsoleCmd("sm_shownames", Client_Shownames);
 	RegConsoleCmd("sm_hide", Client_Hide); 
@@ -973,7 +975,6 @@ public OnMapStart()
 	CreateTimer(2.0, RespawnTimer, _, TIMER_FLAG_NO_MAPCHANGE|TIMER_REPEAT);
 	CreateTimer(2.0, SettingsEnforcerTimer, _, TIMER_FLAG_NO_MAPCHANGE|TIMER_REPEAT);
 	CreateTimer(5.0, SecretTimer, _, TIMER_FLAG_NO_MAPCHANGE|TIMER_REPEAT);
-	CreateTimer(30.0, TriggerFPSCheck, _, TIMER_FLAG_NO_MAPCHANGE|TIMER_REPEAT);
 	CreateTimer(2.0, SpawnButtons, INVALID_HANDLE, TIMER_FLAG_NO_MAPCHANGE);	
 	new String:tmp[64];
 	
@@ -1010,14 +1011,15 @@ public OnMapStart()
 		if(StrEqual(g_szMapTag[0],"kz") || StrEqual(g_szMapTag[0],"xc"))
 			dbCheckFileSize();
 	}	
-
+	
 	//BotMimic2
+	ClearTrie(g_hLoadedRecordsAdditionalTeleport);
 	LoadReplays();
-
+	
 	//AutoBhop?
 	if(StrEqual(g_szMapTag[0],"surf") || StrEqual(g_szMapTag[0],"bhop") || StrEqual(g_szMapTag[0],"mg"))
-		g_bAutoBhop2=true;
-	
+		if (g_bAutoBhop)
+			g_bAutoBhop2=true;		
 	//cheat protection
 	if((StrEqual(g_szMapTag[0],"kz") || StrEqual(g_szMapTag[0],"xc")) || g_bAutoBhop2 == false)
 		g_bBhopHackProtection=true;
@@ -1070,6 +1072,15 @@ public OnConfigsExecuted()
 	decl String:szPath[256];
 	Format(szPath, sizeof(szPath), "sourcemod/kztimer/%s_.cfg",g_szMapTag[0]);
 	ServerCommand("exec %s", szPath);
+	
+	//TEST
+	//AutoBhop?
+	if(StrEqual(g_szMapTag[0],"surf") || StrEqual(g_szMapTag[0],"bhop") || StrEqual(g_szMapTag[0],"mg"))
+		if (g_bAutoBhop)
+			g_bAutoBhop2=true;		
+	//cheat protection
+	if((StrEqual(g_szMapTag[0],"kz") || StrEqual(g_szMapTag[0],"xc")) || g_bAutoBhop2 == false)
+		g_bBhopHackProtection=true;
 }
 
 public OnMapEnd()
@@ -1099,6 +1110,7 @@ public OnClientPostAdminCheck(client)
 		g_strafe_good_sync[client][i] = 0.0;
 		g_strafe_frames[client][i] = 0.0;
 	}
+	g_bKickStatus[client] = false;
 	detailView[client]=-1;
 	g_UspDrops[client] = 0;
 	g_fPlayerCordsUndoTp[client][0] =0.0;
@@ -1213,46 +1225,39 @@ public OnClientPostAdminCheck(client)
 	new mapbonus= RoundToNearest(g_pr_rank_Master/4.0);
 	new Float:fltickrate = 1.0 / GetTickInterval( );
 	PrintToConsole(client," ");
-	PrintToConsole(client, "=======================================================================================================");
-	PrintToConsole(client, "This server is running KZ Timer v%s - Tickrate: %i", VERSION, RoundToNearest(fltickrate));
-	PrintToConsole(client, " ");
+	PrintToConsole(client, "----------------------------------------------------------------------------------------------------");
+	PrintToConsole(client, "This server is running KZTimer v%s - Tickrate: %i", VERSION, RoundToNearest(fltickrate));
 	if (timeleft > 0)
-		PrintToConsole(client, "Timeleft: %s",finalOutput);
-	PrintToConsole(client, "Nextmap: %s", NextMap);
+		PrintToConsole(client, "Timeleft: %s / Nextmap: %s",finalOutput,NextMap);
 	PrintToConsole(client, " ");
-	PrintToConsole(client, "Info");
-	PrintToConsole(client, "You should set cl_downloadfilter to %call%c to get the required plugin files!", QUOTE,QUOTE);
-	PrintToConsole(client, " ");
-	PrintToConsole(client, "Player commands");
+	PrintToConsole(client, "Client commands:");
 	PrintToConsole(client, "!help, !menu, !options, !checkpoint, !gocheck, !prev, !next, !undo, !profile, !compare !bhopcheck");
-	PrintToConsole(client, "!top, !start, !stop, , !pause, !usp, !challenge, !surrender, !goto, !spec, !showsettings");
+	PrintToConsole(client, "!top, !start, !stop, !pause, !usp, !challenge, !surrender, !goto, !spec, !showsettings, !latest");
 	PrintToConsole(client, "(options menu contains: !adv, !info, !colorchat, !cpmessage, !sound, !menusound");
-	PrintToConsole(client, "!hide, !hidespecs, !showtime, !disablegoto, !shownames, !sync, !bhop, !ice)");
+	PrintToConsole(client, "!hide, !hidespecs, !showtime, !disablegoto, !shownames, !sync, !bhop, !jumppenalty)");
 	PrintToConsole(client, " ");
-	PrintToConsole(client, "Live scoreboard");
+	PrintToConsole(client, "Live scoreboard:");
 	PrintToConsole(client, "Kills: Time in seconds");
 	PrintToConsole(client, "Assists: Checkpoints");
 	PrintToConsole(client, "Deaths: Teleports");
 	PrintToConsole(client, "MVP Stars: Number of finished map runs on the current map");
 	PrintToConsole(client, " ");
-	PrintToConsole(client, "Player point system");
-	PrintToConsole(client, "You get points for finishing a map, top 100 times (depends on rank), map completion percentage,");
-	PrintToConsole(client, "and JumpStats (top 20) + a %ip bonus if your map completion (tp+pro) has reached 100%", mapbonus);
+	PrintToConsole(client, "Points distribution of the ranking system:");	
+	PrintToConsole(client, "- Pro times give twice as much points as tp times");
+	PrintToConsole(client, "- Points for finishing a map (your first tp/pro time on a map gives a bonus)");
+	PrintToConsole(client, "- Extra points for improving your time");
+	PrintToConsole(client, "- Extra points for top 100 times)");
+	PrintToConsole(client, "- Extra points for new records");
+	PrintToConsole(client, "- Top 20 lj/wj/bhop/multibhop/dropbhop jump distances");
+	PrintToConsole(client, "- Map completion percentage");	
+	PrintToConsole(client, "- %ip bonus if your map completion (tp+pro) has reached 100%", mapbonus);
+	PrintToConsole(client, "- Challenges");
 	PrintToConsole(client, " ");
 	PrintToConsole(client, "Skill groups:");
-	PrintToConsole(client, "NOVICE (%ip)",g_pr_rank_Novice);
-	PrintToConsole(client, "SCRUB (%ip)",g_pr_rank_Scrub);
-	PrintToConsole(client, "ROOKIE (%ip)",g_pr_rank_Rookie);
-	PrintToConsole(client, "SKILLED (%ip)",g_pr_rank_Skilled);
-	PrintToConsole(client, "EXPERT (%ip)",g_pr_rank_Expert);
-	PrintToConsole(client, "PRO (%ip)",g_pr_rank_Pro);
-	PrintToConsole(client, "ELITE (%ip)",g_pr_rank_Elite);
-	if (g_bNoClipS)
-		PrintToConsole(client, "MASTER (%ip) - NoClip unlocked",g_pr_rank_Master);	
-	else
-		PrintToConsole(client, "MASTER (%ip)",g_pr_rank_Master);	
-	PrintToConsole(client, "========================================================================================================");
-	PrintToConsole(client, " ");		
+	PrintToConsole(client, "NOVICE (%ip), SCRUB (%ip), ROOKIE (%ip), SKILLED (%ip)",g_pr_rank_Novice, g_pr_rank_Scrub, g_pr_rank_Rookie, g_pr_rank_Skilled);
+	PrintToConsole(client, "EXPERT (%ip), PRO (%ip), ELITE (%ip), MASTER (%ip)",g_pr_rank_Expert,g_pr_rank_Pro, g_pr_rank_Elite, g_pr_rank_Master);
+	PrintToConsole(client, "----------------------------------------------------------------------------------------------------");	
+	PrintToConsole(client," ");
 }
 
 public OnClientDisconnect(client)
@@ -1261,9 +1266,8 @@ public OnClientDisconnect(client)
 		return
 	
 	//stop bot mimic
-	if(g_hBotMimicsRecord[client] != INVALID_HANDLE && IsFakeClient(client))
-		StopPlayerMimic(client);
-	
+	StopPlayerMimic(client);
+
 	if (IsFakeClient(client) || !IsClientInGame(client))
 		return;
 		
@@ -1271,6 +1275,7 @@ public OnClientDisconnect(client)
 	decl String:szSteamId[32];
 	GetClientAuthString(client, szSteamId, 32);
 	
+
 	//get last position
 	if(GetEntDataEnt2(client, FindSendPropOffs("CBasePlayer", "m_hGroundEntity")) != -1)
 	{
