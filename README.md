@@ -21,3 +21,10 @@ v1.11
 - auto-removing of records from banned players
 - added kz_anticheat_ban_duration (hours)
 - added !bhopcheck <name>
+
+v1.12
+- code optimization
+
+v1.13
+- player names of jumpstats records and player times refer to the profile name 
+- code optimization
