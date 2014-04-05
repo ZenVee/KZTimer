@@ -23,8 +23,10 @@ v1.11
 - added !bhopcheck <name>
 
 v1.12
+- minor bug fixes
 - code optimization
 
 v1.13
 - player names of jumpstats records and player times refer to the profile name 
+- minor bug fixes
 - code optimization
