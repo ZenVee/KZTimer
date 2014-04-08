@@ -1008,7 +1008,7 @@ public OnMapStart()
 	{	
 		g_unique_FileSize =  FileSize(mapPath);
 		//supported map tags 
-		if(StrEqual(g_szMapTag[0],"kz") || StrEqual(g_szMapTag[0],"xc"))
+		if(StrEqual(g_szMapTag[0],"kz") || StrEqual(g_szMapTag[0],"xc") || StrEqual(g_szMapTag[0],"bkz"))
 			dbCheckFileSize();
 	}	
 	
@@ -1020,8 +1020,9 @@ public OnMapStart()
 	if(StrEqual(g_szMapTag[0],"surf") || StrEqual(g_szMapTag[0],"bhop") || StrEqual(g_szMapTag[0],"mg"))
 		if (g_bAutoBhop)
 			g_bAutoBhop2=true;		
+			
 	//cheat protection
-	if((StrEqual(g_szMapTag[0],"kz") || StrEqual(g_szMapTag[0],"xc")) || g_bAutoBhop2 == false)
+	if((StrEqual(g_szMapTag[0],"kz") || StrEqual(g_szMapTag[0],"xc")  || StrEqual(g_szMapTag[0],"bkz")) || g_bAutoBhop2 == false)
 		g_bBhopHackProtection=true;
 		
 }
@@ -1079,7 +1080,7 @@ public OnConfigsExecuted()
 		if (g_bAutoBhop)
 			g_bAutoBhop2=true;		
 	//cheat protection
-	if((StrEqual(g_szMapTag[0],"kz") || StrEqual(g_szMapTag[0],"xc")) || g_bAutoBhop2 == false)
+	if((StrEqual(g_szMapTag[0],"kz") || StrEqual(g_szMapTag[0],"xc") || StrEqual(g_szMapTag[0],"bkz")) || g_bAutoBhop2 == false)
 		g_bBhopHackProtection=true;
 }
 

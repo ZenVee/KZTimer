@@ -725,7 +725,7 @@ public Action:OnPlayerConnectTimer(Handle:timer, any:client)
 		g_bRestoreCMsg[client]=false;
 		
 		if (g_bAllowCheckpoints)
-			if(StrEqual(g_szMapTag[0],"kz") || StrEqual(g_szMapTag[0],"xc"))
+			if(StrEqual(g_szMapTag[0],"kz") || StrEqual(g_szMapTag[0],"xc")  || StrEqual(g_szMapTag[0],"bkz"))
 				Client_Kzmenu(client,0);
 	}
 }
