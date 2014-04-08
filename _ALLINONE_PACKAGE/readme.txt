@@ -11,7 +11,7 @@ package including:
 
 howto install:
 1. download latest metamod + sourcemod version 
-2. download latest kztimer snapshot (github)
+2. download latest kztimer version (including sounds models etc.)
 3. copy all folders/files into their directory
 4. server restart
 
@@ -21,8 +21,8 @@ csgo\gamemodes_server.txt (add your maps here)
 csgo\addons\sourcemod\configs\mapchooser_extended\maps\csgo.txt (add your maps here)
 csgo\cfg\sourcemod\kztimer\xxx.cfg (map type configs)
 csgo\cfg\gamemode_casual_server.cfg (server config)
-csgo\cfg\sourcemod\kztimer.cfg (appears after server restart)
+csgo\cfg\sourcemod\kztimer.cfg (kztimer config, appears after server restart)
 
 info:
-datatable warning message is harmless, just ignore it
-caused by kz_prestrafe 1
+datatable warning messages are harmless (caused by jumppenalty command and kz_prestrafe 1)
+The cleaner extention hide those messages.
