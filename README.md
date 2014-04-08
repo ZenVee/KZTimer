@@ -30,3 +30,7 @@ v1.13
 - player names of jumpstats records and player times refer to the profile name 
 - minor bug fixes
 - code optimization
+
+v1.14
+- overhauled calculation of player rankings
+- fixed several minor bugs
