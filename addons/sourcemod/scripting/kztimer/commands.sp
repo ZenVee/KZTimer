@@ -957,7 +957,7 @@ public Action:Client_Compare(client, args)
 
 public Action:Client_Start(client, args)
 {
-	if (!IsPlayerAlive(client) || GetClientTeam(client) == 1) 
+	if (!IsClientInGame(client) || !IsPlayerAlive(client) || GetClientTeam(client) == 1) 
 		return Plugin_Handled;
 	
 	new Float: e_time = GetEngineTime();

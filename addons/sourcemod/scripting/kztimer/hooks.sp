@@ -89,6 +89,7 @@ public Action:Event_OnPlayerSpawn(Handle:event, const String:name[], bool:dontBr
 		CreateTimer(0.0, HideRadar, client,TIMER_FLAG_NO_MAPCHANGE);
 		
 		//set clantag
+		g_fconnected_time[client] = GetEngineTime();
 		CreateTimer(1.5, SetClanTag, client,TIMER_FLAG_NO_MAPCHANGE);	
 		
 		//set speclist

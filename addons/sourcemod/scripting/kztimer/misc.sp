@@ -504,17 +504,41 @@ public MapFinishedMsgs(client, type)
 							PrintToConsole(i, "[KZ] %s scored a new TP RECORD",szName); 	
 						}					
 		}
+		
 		if (rank==99999)
-			PrintToChat(client, "[%cKZ%c] %cFailed to save your data correctly! There might be a problem with your player name. ( e.g. special characters like %c'%c )",MOSSGREEN,WHITE,DARKRED,RED,DARKRED); 	
+			PrintToChat(client, "[%cKZ%c] %cFailed to save your data correctly! Please contact an admin.",MOSSGREEN,WHITE,DARKRED,RED,DARKRED); 	
 		//Sound
 		PlayRecordSound(g_sound_type[client]);			
 	
 		//noclip MsgMsg
-		if (g_bMapFinished[client] == false && !StrEqual(g_pr_rankname[client],"MASTER") && g_bNoClipS)
+		if (IsClientInGame(client) && g_bMapFinished[client] == false && !StrEqual(g_pr_rankname[client],"MASTER") && g_bNoClipS)
 			PrintToChat(client, "%t", "NoClipUnlocked",MOSSGREEN,WHITE,YELLOW);
 		g_bMapFinished[client] = true;
 		CreateTimer(2.0, DBUpdateTimer, client,TIMER_FLAG_NO_MAPCHANGE);
 		g_fStartTime[client] = -1.0;		
+	}
+}
+
+public ReplaceChar(String:sSplitChar[], String:sReplace[], String:sString[64])
+{
+	StrCat(sString, sizeof(sString), " ");
+	new String:sBuffer[16][256];
+	ExplodeString(sString, sSplitChar, sBuffer, sizeof(sBuffer), sizeof(sBuffer[]));
+	strcopy(sString, sizeof(sString), "");
+	for (new i = 0; i < sizeof(sBuffer); i++)
+	{
+		if (strcmp(sBuffer[i], "") == 0)
+			continue;
+		if (i != 0)
+		{
+			new String:sTmpStr[256];
+			Format(sTmpStr, sizeof(sTmpStr), "%s%s", sReplace, sBuffer[i]);
+			StrCat(sString, sizeof(sString), sTmpStr);
+		}
+		else
+		{
+			StrCat(sString, sizeof(sString), sBuffer[i]);
+		}
 	}
 }
 

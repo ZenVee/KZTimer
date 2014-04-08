@@ -221,7 +221,6 @@ public CL_OnEndTimerPress(client)
 	//calc difference
 	if (g_OverallTp[client]==0)
 	{
-		g_pr_multiplier[client]+=4;
 		if (g_fPersonalRecordPro[client] > 0.0)
 		{
 			hasRecord=true;
@@ -229,25 +228,33 @@ public CL_OnEndTimerPress(client)
 			FormatTimeFloat(client, difference, 3);
 		}
 		else
+		{
+			g_pr_multiplier[client]+=6;
 			g_pr_finishedmaps_pro[client]++;
+		}
 		
 	}
 	else
 	{
-		g_pr_multiplier[client]+=3;
 		if (g_fPersonalRecord[client] > 0.0 && g_OverallTp[client] > 0)
-		{
+		{		
 			hasRecord=true;
 			difference = g_fPersonalRecord[client]-g_fFinalTime[client];
 			FormatTimeFloat(client, difference, 3);
 		}	
 		else
-			g_pr_finishedmaps_tp[client]++;			
+		{
+			g_pr_multiplier[client]+=3;
+			g_pr_finishedmaps_tp[client]++;
+		}
 	}
 	if (hasRecord)
 	{
 		if (difference > 0.0)
+		{
+			g_pr_multiplier[client]+=2;
 			Format(g_szTimeDifference[client], 32, "-%s", g_szTime[client]);
+		}
 		else
 			Format(g_szTimeDifference[client], 32, "+%s", g_szTime[client]);
 	}
@@ -291,7 +298,6 @@ public CL_OnEndTimerPress(client)
 		{
 			g_fRecordTimeGlobal = g_fFinalTime[client];
 			Format(g_szRecordGlobalPlayer, MAX_NAME_LENGTH, "%s", szName);	
-			g_pr_multiplier[client]+= 6;
 			g_record_type[client] = 3;
 			g_sound_type[client] = 1;	
 		}
@@ -301,7 +307,6 @@ public CL_OnEndTimerPress(client)
 			{
 				g_fRecordTimeGlobal128 = g_fFinalTime[client];
 				Format(g_szRecordGlobalPlayer128, MAX_NAME_LENGTH, "%s", szName);	
-				g_pr_multiplier[client]+= 6;
 				g_record_type[client] = 4;
 				g_sound_type[client] = 1;	
 			}
@@ -311,7 +316,6 @@ public CL_OnEndTimerPress(client)
 	//NEW PRO RECORD
 	if((g_fFinalTime[client] < g_fRecordTimePro) && g_OverallTp[client] <= 0)
 	{
-		g_pr_multiplier[client]+= 5;
 		if (g_record_type[client] != 3 && g_record_type[client] != 4)
 			g_record_type[client] = 2;
 		g_fRecordTimePro = g_fFinalTime[client]; 
@@ -328,7 +332,6 @@ public CL_OnEndTimerPress(client)
 	//NEW TP RECORD
 	if((g_fFinalTime[client] < g_fRecordTime) && g_OverallTp[client] > 0)
 	{
-		g_pr_multiplier[client]+=4;
 		if (g_record_type[client] != 3 && g_record_type[client] != 4)
 			g_record_type[client] = 1;
 		g_fRecordTime = g_fFinalTime[client];
@@ -393,7 +396,6 @@ public CL_OnEndTimerPress(client)
 	//local db update
 	if ((g_fFinalTime[client] < g_fPersonalRecord[client] && teleports > 0 || g_fPersonalRecord[client] <= 0.0 && teleports > 0) || (g_fFinalTime[client] < g_fPersonalRecordPro[client] && teleports == 0 || g_fPersonalRecordPro[client] <= 0.0 && teleports == 0))
 	{
-		g_pr_multiplier[client]++;
 		db_selectRecord(client);
 	}
 	else

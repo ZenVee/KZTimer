@@ -156,7 +156,7 @@ public KzAdminMenu(client)
 		Format(szTmp, sizeof(szTmp), "[26.] JumpStats  -  Disabled"); 				
 	AddMenuItem(adminmenu, szTmp, szTmp);
 	if (g_bAutoBhop)
-		Format(szTmp, sizeof(szTmp), "[27.] AutoBhop -  Enabled (Global DB disabled)"); 	
+		Format(szTmp, sizeof(szTmp), "[27.] AutoBhop -  Enabled"); 	
 	else
 		Format(szTmp, sizeof(szTmp), "[27.] AutoBhop  -  Disabled"); 				
 	AddMenuItem(adminmenu, szTmp, szTmp);

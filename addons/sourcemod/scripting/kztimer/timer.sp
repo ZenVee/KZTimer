@@ -292,7 +292,8 @@ public Action:SetClanTag(Handle:timer, any:client)
 			CS_SetClientClanTag(client, g_pr_rankname[client]); 	
 	}
 	
-	if (oldrank && g_bPointSystem)
+	new Float:x = GetEngineTime() - g_fconnected_time[client];
+	if (oldrank && g_bPointSystem && x > 5.0)
 		if (!StrEqual(g_pr_rankname[client], old_pr_rankname, false) && IsClientInGame(client))
 			PrintToChat(client,"%t","SkillGroup", MOSSGREEN, WHITE, GRAY,RED, g_pr_rankname[client]);
 }

@@ -11,7 +11,7 @@
 #include <geoip>
 #include <colors>
 #undef REQUIRE_EXTENSIONS
-#define VERSION "1.13"
+#define VERSION "1.14"
 #define ADMIN_LEVEL ADMFLAG_UNBAN
 #define WHITE 0x01
 #define DARKRED 0x02
@@ -285,6 +285,7 @@ new Float:g_good_sync[MAXPLAYERS+1];
 new Float:g_sync_frames[MAXPLAYERS+1];
 new Float:g_fLastPosition[MAXPLAYERS + 1][3];
 new Float:g_fLastVelocity[MAXPLAYERS + 1];
+new Float:g_fconnected_time[MAXPLAYERS+1];
 new Float:g_fLastAngle[MAXPLAYERS + 1];
 new Float:g_OldAngle[MAXPLAYERS+1];
 new Float:g_pr_finishedmaps_tp_perc[MAX_PR_PLAYERS]; 
@@ -391,7 +392,6 @@ new g_pr_rank_Master;
 new g_pr_points_finished;
 new g_pr_dyn_maxpoints;
 new g_pr_rowcount;
-new g_pr_row;
 new g_pr_points[MAX_PR_PLAYERS];
 new g_pr_maprecords_row_counter[MAX_PR_PLAYERS];
 new g_pr_maprecords_row_count[MAX_PR_PLAYERS];
@@ -657,7 +657,7 @@ public OnPluginStart()
 	GetConVarString(g_hWelcomeMsg,g_sWelcomeMsg,512);
 	HookConVarChange(g_hWelcomeMsg, OnSettingChanged);
 	
-	g_hBanDuration   = CreateConVar("kz_anticheat_ban_duration", "72.0", "Ban duration (Hours)", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 300.0, true, 400.0);
+	g_hBanDuration   = CreateConVar("kz_anticheat_ban_duration", "72.0", "Ban duration (Hours)", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 1.0, true, 999999.0);
 	
 	//jump physics depend on tickrate.. therefore different defaults
 	if (g_btickrate64)
@@ -667,7 +667,7 @@ public OnPluginStart()
 		if (!g_bPreStrafe)
 		{
 			g_hdist_pro_lj   	= CreateConVar("kz_dist_pro_lj", "243.0", "Minimum distance for longjumps to be considered pro [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 220.0, true, 999.0);
-			g_hdist_leet_lj    	= CreateConVar("kz_dist_leet_lj", "247.0", "Minimum distance for longjumps to be considered leet [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 245.0, true, 999.0);	
+			g_hdist_leet_lj    	= CreateConVar("kz_dist_leet_lj", "248.0", "Minimum distance for longjumps to be considered leet [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 245.0, true, 999.0);	
 		}
 		else
 		{
@@ -693,17 +693,17 @@ public OnPluginStart()
 		g_hdist_good_lj    	= CreateConVar("kz_dist_min_lj", "235.0", "Minimum distance for longjumps to be considered good [Client Message]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 200.0, true, 999.0);
 		if (!g_bPreStrafe)
 		{
-			g_hdist_pro_lj   	= CreateConVar("kz_dist_pro_lj", "253.0", "Minimum distance for longjumps to be considered pro [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 220.0, true, 999.0);
-			g_hdist_leet_lj    	= CreateConVar("kz_dist_leet_lj", "260.0", "Minimum distance for longjumps to be considered leet [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 245.0, true, 999.0);	
+			g_hdist_pro_lj   	= CreateConVar("kz_dist_pro_lj", "254.0", "Minimum distance for longjumps to be considered pro [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 220.0, true, 999.0);
+			g_hdist_leet_lj    	= CreateConVar("kz_dist_leet_lj", "263.0", "Minimum distance for longjumps to be considered leet [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 245.0, true, 999.0);	
 		}
 		else
 		{
-			g_hdist_pro_lj   	= CreateConVar("kz_dist_pro_lj", "260.0", "Minimum distance for longjumps to be considered pro [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 220.0, true, 999.0);
-			g_hdist_leet_lj    	= CreateConVar("kz_dist_leet_lj", "266.0", "Minimum distance for longjumps to be considered leet [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 245.0, true, 999.0);		
+			g_hdist_pro_lj   	= CreateConVar("kz_dist_pro_lj", "262.0", "Minimum distance for longjumps to be considered pro [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 220.0, true, 999.0);
+			g_hdist_leet_lj    	= CreateConVar("kz_dist_leet_lj", "270.0", "Minimum distance for longjumps to be considered leet [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 245.0, true, 999.0);		
 		}
 		g_hdist_good_weird  = CreateConVar("kz_dist_min_wj", "230.0", "Minimum distance for weird jumps to be considered good [Client Message]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 200.0, true, 999.0);
-		g_hdist_pro_weird  = CreateConVar("kz_dist_pro_wj", "270.0", "Minimum distance for weird jumps to be considered pro [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 200.0, true, 999.0);
-		g_hdist_leet_weird   = CreateConVar("kz_dist_leet_wj", "276.0", "Minimum distance for weird jumps to be considered leet [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 200.0, true, 999.0);
+		g_hdist_pro_weird  = CreateConVar("kz_dist_pro_wj", "275.0", "Minimum distance for weird jumps to be considered pro [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 200.0, true, 999.0);
+		g_hdist_leet_weird   = CreateConVar("kz_dist_leet_wj", "280.0", "Minimum distance for weird jumps to be considered leet [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 200.0, true, 999.0);
 		g_hdist_good_dropbhop  = CreateConVar("kz_dist_min_dropbhop", "275.0", "Minimum distance for drop bhops to be considered good [Client Message]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 200.0, true, 999.0);
 		g_hdist_pro_dropbhop  = CreateConVar("kz_dist_pro_dropbhop", "320.0", "Minimum distance for drop bhops to be considered pro [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 200.0, true, 999.0);
 		g_hdist_leet_dropbhop   = CreateConVar("kz_dist_leet_dropbhop", "330.0", "Minimum distance for drop bhops to be considered leet [JumpStats Colorchat All]", FCVAR_PLUGIN|FCVAR_NOTIFY, true, 200.0, true, 999.0);
@@ -1061,11 +1061,11 @@ public OnConfigsExecuted()
 	g_pr_rank_Novice = RoundToCeil(g_pr_dyn_maxpoints * 0.001);  
 	g_pr_rank_Scrub = RoundToCeil(g_pr_dyn_maxpoints * 0.03); 
 	g_pr_rank_Rookie = RoundToCeil(g_pr_dyn_maxpoints * 0.12);  
-	g_pr_rank_Skilled = RoundToCeil(g_pr_dyn_maxpoints * 0.45);  
+	g_pr_rank_Skilled = RoundToCeil(g_pr_dyn_maxpoints * 0.55);  
 	g_pr_rank_Expert = RoundToCeil(g_pr_dyn_maxpoints * 0.75);  
 	g_pr_rank_Pro = RoundToCeil(g_pr_dyn_maxpoints * 1.1);  
-	g_pr_rank_Elite = RoundToCeil(g_pr_dyn_maxpoints * 1.5); 
-	g_pr_rank_Master = RoundToCeil(g_pr_dyn_maxpoints * 2.0); 
+	g_pr_rank_Elite = RoundToCeil(g_pr_dyn_maxpoints * 1.45); 
+	g_pr_rank_Master = RoundToCeil(g_pr_dyn_maxpoints * 1.9); 
 	g_pr_points_finished = g_pr_rank_Novice;
 
 	//map config
@@ -1172,6 +1172,22 @@ public OnClientPostAdminCheck(client)
 	if (!IsClientInGame(client) || IsFakeClient(client))
 		return;	
 	
+	//sqlite ' char fix
+	if(g_DbType != MYSQL)
+	{
+		decl String:szName[64];
+		decl String:szOldName[64];
+		GetClientName(client,szName,64);
+		Format(szOldName, 64,"%s ",szName);
+		ReplaceChar("'", "`", szName);
+		if (!(StrEqual(szOldName,szName)))
+		{
+			SetClientInfo(client, "name", szName);
+			SetEntPropString(client, Prop_Data, "m_szNetname", szName);
+			CS_SetClientName(client, szName);
+		}
+	}
+	
 	//options
 	g_bInfoPanel[client]=false;
 	g_bClimbersMenuSounds[client]=true;
@@ -1225,7 +1241,7 @@ public OnClientPostAdminCheck(client)
 	new mapbonus= RoundToNearest(g_pr_rank_Master/4.0);
 	new Float:fltickrate = 1.0 / GetTickInterval( );
 	PrintToConsole(client," ");
-	PrintToConsole(client, "----------------------------------------------------------------------------------------------------");
+	PrintToConsole(client, "--------------------------------------------------------------------------------------------------------");
 	PrintToConsole(client, "This server is running KZTimer v%s - Tickrate: %i", VERSION, RoundToNearest(fltickrate));
 	if (timeleft > 0)
 		PrintToConsole(client, "Timeleft: %s / Nextmap: %s",finalOutput,NextMap);
@@ -1242,21 +1258,17 @@ public OnClientPostAdminCheck(client)
 	PrintToConsole(client, "Deaths: Teleports");
 	PrintToConsole(client, "MVP Stars: Number of finished map runs on the current map");
 	PrintToConsole(client, " ");
-	PrintToConsole(client, "Points distribution of the ranking system:");	
-	PrintToConsole(client, "- Pro times give twice as much points as tp times");
-	PrintToConsole(client, "- Points for finishing a map (your first tp/pro time on a map gives a bonus)");
-	PrintToConsole(client, "- Extra points for improving your time");
-	PrintToConsole(client, "- Extra points for top 100 times)");
-	PrintToConsole(client, "- Extra points for new records");
-	PrintToConsole(client, "- Top 20 lj/wj/bhop/multibhop/dropbhop jump distances");
-	PrintToConsole(client, "- Map completion percentage");	
-	PrintToConsole(client, "- %ip bonus if your map completion (tp+pro) has reached 100%", mapbonus);
-	PrintToConsole(client, "- Challenges");
+	PrintToConsole(client, "How does the ranking system work?");		
+	PrintToConsole(client, "The System depends on your current rank on each map, to prevent points farming.");	
+	PrintToConsole(client, "Once you finished all maps (tp+pro) you can get only points by improving your rank! (#1,#2,#3 extra bonus)");	
+	PrintToConsole(client, "You will get a bonus of %ip when your map completion (tp+pro) has reached 100%",mapbonus);	
+	PrintToConsole(client, "Moreover, you can earn points by winning challenges and top 20 lj's, wj's, bhop jumps,");
+	PrintToConsole(client, "dropbhop jumps and multi-bhop jumps.");	
 	PrintToConsole(client, " ");
 	PrintToConsole(client, "Skill groups:");
 	PrintToConsole(client, "NOVICE (%ip), SCRUB (%ip), ROOKIE (%ip), SKILLED (%ip)",g_pr_rank_Novice, g_pr_rank_Scrub, g_pr_rank_Rookie, g_pr_rank_Skilled);
-	PrintToConsole(client, "EXPERT (%ip), PRO (%ip), ELITE (%ip), MASTER (%ip)",g_pr_rank_Expert,g_pr_rank_Pro, g_pr_rank_Elite, g_pr_rank_Master);
-	PrintToConsole(client, "----------------------------------------------------------------------------------------------------");	
+	PrintToConsole(client, "EXPERT (%ip), PRO (%ip), ELITE (%ip), MASTER (%ip)[NoClip bonus]",g_pr_rank_Expert,g_pr_rank_Pro, g_pr_rank_Elite, g_pr_rank_Master);
+	PrintToConsole(client, "--------------------------------------------------------------------------------------------------------");	
 	PrintToConsole(client," ");
 }
 
