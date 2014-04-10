@@ -314,6 +314,7 @@ new bool:g_bCheckSurf[MAXPLAYERS+1];
 new bool:g_bSpectate[MAXPLAYERS+1];
 new bool:g_bTimeractivated[MAXPLAYERS+1];
 new bool:g_bFirstSpawn[MAXPLAYERS+1];
+new bool:g_bFirstSpawn2[MAXPLAYERS+1];
 new bool:g_bRestoreC[MAXPLAYERS+1]; 
 new bool:g_bRestoreCMsg[MAXPLAYERS+1]; 
 new bool:g_bClimbersMenuOpen[MAXPLAYERS+1]; 
@@ -850,7 +851,7 @@ public OnPluginStart()
 		OnAdminMenuReady(topmenu);
 		
 	//hooks
-	HookEvent("player_spawn", Event_OnPlayerSpawn);
+	HookEvent("player_spawn", Event_OnPlayerSpawn, EventHookMode_Post);
 	HookEvent("player_death", Event_OnPlayerDeath);
 	HookEvent("round_start", Event_OnRoundStart);
 	HookEvent("player_hurt", Event_OnPlayerHurt);
@@ -1123,7 +1124,8 @@ public OnClientPostAdminCheck(client)
 	g_bSpectate[client] = false;
 	g_ground_frames[client] = 0;
 	g_fPlayerConnectedTime[client]=GetEngineTime();			
-	g_bFirstSpawn[client] = true;		
+	g_bFirstSpawn[client] = true;	
+	g_bFirstSpawn2[client] = true;			
 	g_CurrentCp[client] = -1;
 	g_SpecTarget[client] = -1;
 	g_CounterCp[client] = 0;

@@ -25,8 +25,7 @@ public Action:Event_OnPlayerSpawn(Handle:event, const String:name[], bool:dontBr
 			SetEntData(client, FindSendPropOffs("CBaseEntity", "m_CollisionGroup"), 2, 4, true);
 		else
 			SetEntData(client, FindSendPropOffs("CBaseEntity", "m_CollisionGroup"), 5, 4, true);
-				
-			
+							
 		//botmimic2		
 		if(g_hBotMimicsRecord[client] != INVALID_HANDLE && IsFakeClient(client))
 		{
@@ -36,7 +35,6 @@ public Action:Event_OnPlayerSpawn(Handle:event, const String:name[], bool:dontBr
 		
 		if (IsFakeClient(client))	
 		{
-			//clantag
 			CS_SetClientClanTag(client, "LOCALHOST"); 
 			return;
 		}
@@ -55,21 +53,22 @@ public Action:Event_OnPlayerSpawn(Handle:event, const String:name[], bool:dontBr
 		//1st spawn?
 		if (g_bFirstSpawn[client])		
 		{
-			StartRecording(client);
-			CreateTimer(1.5, OnPlayerConnectTimer, client,TIMER_FLAG_NO_MAPCHANGE);
+			CreateTimer(0.5, StartMsgTimer, client,TIMER_FLAG_NO_MAPCHANGE);
 			CreateTimer(5.0, WelcomeMsgTimer, client,TIMER_FLAG_NO_MAPCHANGE);
 			CreateTimer(60.0, HelpMsgTimer, client,TIMER_FLAG_NO_MAPCHANGE);
 			CreateTimer(300.0, ChallengeMsgTimer, client,TIMER_FLAG_NO_MAPCHANGE);				
 			g_bFirstSpawn[client] = false;
 		}
 
-		//get start pos for challenge
-		if (GetClientTeam(client) > 1)
+		//1st spawn & t/ct
+		if (g_bFirstSpawn2[client] && (GetClientTeam(client) > 1))		
 		{
-			GetClientAbsOrigin(client, g_fCStartPosition[client]);
-			CreateTimer(0.8, OnShowMenuTimer, client,TIMER_FLAG_NO_MAPCHANGE);
+			StartRecording(client);
+			CreateTimer(1.5, CenterMsgTimer, client,TIMER_FLAG_NO_MAPCHANGE);		
+			g_bFirstSpawn2[client] = false;
 		}
-		//restore position (before spec or last session)
+		
+		//restore position (before spec or last session) && Climbers Menu
 		if ((GetClientTeam(client) > 1))
 		{
 			if (g_bRestoreC[client])
@@ -86,7 +85,10 @@ public Action:Event_OnPlayerSpawn(Handle:event, const String:name[], bool:dontBr
 				else
 					if (g_bAutoTimer)
 						CL_OnStartTimerPress(client);
+			
+			CreateTimer(0.0, ClimbersMenuTimer, client,TIMER_FLAG_NO_MAPCHANGE);
 		}
+		
 		//hide radar
 		CreateTimer(0.0, HideRadar, client,TIMER_FLAG_NO_MAPCHANGE);
 		
@@ -255,10 +257,12 @@ public Action:EventTeamChange(Handle:event, const String:name[], bool:dontBroadc
 	new team = GetEventInt(event, "team");
 	if(team == 1)
 	{
-		//StripWeapons(client);
-		GetClientAbsOrigin(client,g_fPlayerCordsRestore[client]);
-		GetClientEyeAngles(client, g_fPlayerAnglesRestore[client]);
-		g_bRespawnPosition[client] = true;
+		if (!g_bFirstSpawn2[client])
+		{
+			GetClientAbsOrigin(client,g_fPlayerCordsRestore[client]);
+			GetClientEyeAngles(client, g_fPlayerAnglesRestore[client]);
+			g_bRespawnPosition[client] = true;
+		}
 		if (g_bTimeractivated[client] == true)
 		{	
 			g_fStartPauseTime[client] = GetEngineTime();

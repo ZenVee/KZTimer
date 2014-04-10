@@ -661,7 +661,6 @@ public Action:WelcomeMsgTimer(Handle:timer, any:client)
 {
 	if (IsClientInGame(client) && !IsFakeClient(client))
 		PrintToChat(client, "[%cKZ%c] %s", MOSSGREEN,WHITE, g_sWelcomeMsg);
-	g_bFirstSpawn[client] = false;
 }
 
 public Action:OverlayTimer(Handle:timer, any:client)
@@ -674,14 +673,12 @@ public Action:HelpMsgTimer(Handle:timer, any:client)
 {
 	if (IsClientInGame(client) && !IsFakeClient(client))
 		PrintToChat(client, "%t", "HelpMsg", MOSSGREEN,WHITE,GREEN,WHITE);
-	g_bFirstSpawn[client] = false;
 }
 
 public Action:ChallengeMsgTimer(Handle:timer, any:client)
 {
 	if (IsClientInGame(client) && !IsFakeClient(client))
 		PrintToChat(client, "%t", "ChallengeMsg", MOSSGREEN,WHITE,GREEN,WHITE);
-	g_bFirstSpawn[client] = false;
 }
 
 public Action:GetTakeOffSpeedTimer(Handle:timer, any:client)
@@ -695,7 +692,7 @@ public Action:GetTakeOffSpeedTimer(Handle:timer, any:client)
 	}
 }
 
-public Action:OnPlayerConnectTimer(Handle:timer, any:client)
+public Action:StartMsgTimer(Handle:timer, any:client)
 {
 	if (IsClientInGame(client) && !IsFakeClient(client))
 	{
@@ -706,9 +703,14 @@ public Action:OnPlayerConnectTimer(Handle:timer, any:client)
 		else
 			PrintToChat(client, "%t", "SettingsEnforcerDisabled", MOSSGREEN,WHITE,GRAY);	
 			
-		//display map records
-		PrintMapRecords(client);
+		PrintMapRecords(client);	
+	}
+}
 
+public Action:CenterMsgTimer(Handle:timer, any:client)
+{
+	if (IsClientInGame(client) && !IsFakeClient(client))
+	{
 		if (g_bRestoreCMsg[client])
 		{
 			CreateTimer(3.5, OverlayTimer, client,TIMER_FLAG_NO_MAPCHANGE);
@@ -726,12 +728,14 @@ public Action:OnPlayerConnectTimer(Handle:timer, any:client)
 	}
 }
 
-public Action:OnShowMenuTimer(Handle:timer, any:client)
+public Action:ClimbersMenuTimer(Handle:timer, any:client)
 {
 	if (IsClientInGame(client) && !IsFakeClient(client))
+	{
 		if (g_bAllowCheckpoints)
 			if(StrEqual(g_szMapTag[0],"kz") || StrEqual(g_szMapTag[0],"xc") || StrEqual(g_szMapTag[0],"bhop") || StrEqual(g_szMapTag[0],"bkz"))
 				Client_Kzmenu(client,0);
+	}
 }
 
 public Action:RespawnPlayer(Handle:Timer, any:client)
