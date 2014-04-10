@@ -56,7 +56,7 @@ public Action:Event_OnPlayerSpawn(Handle:event, const String:name[], bool:dontBr
 		if (g_bFirstSpawn[client])		
 		{
 			StartRecording(client);
-			CreateTimer(0.5, OnPlayerConnectTimer, client,TIMER_FLAG_NO_MAPCHANGE);
+			CreateTimer(1.5, OnPlayerConnectTimer, client,TIMER_FLAG_NO_MAPCHANGE);
 			CreateTimer(5.0, WelcomeMsgTimer, client,TIMER_FLAG_NO_MAPCHANGE);
 			CreateTimer(60.0, HelpMsgTimer, client,TIMER_FLAG_NO_MAPCHANGE);
 			CreateTimer(300.0, ChallengeMsgTimer, client,TIMER_FLAG_NO_MAPCHANGE);				
@@ -67,7 +67,7 @@ public Action:Event_OnPlayerSpawn(Handle:event, const String:name[], bool:dontBr
 		if (GetClientTeam(client) > 1)
 		{
 			GetClientAbsOrigin(client, g_fCStartPosition[client]);
-			CreateTimer(1.5, OnShowMenuTimer, client,TIMER_FLAG_NO_MAPCHANGE);
+			CreateTimer(0.8, OnShowMenuTimer, client,TIMER_FLAG_NO_MAPCHANGE);
 		}
 		//restore position (before spec or last session)
 		if ((GetClientTeam(client) > 1))
