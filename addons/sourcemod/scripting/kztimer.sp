@@ -856,8 +856,9 @@ public OnPluginStart()
 	HookEvent("round_start", Event_OnRoundStart);
 	HookEvent("player_hurt", Event_OnPlayerHurt);
 	HookEvent("player_jump", Event_OnJump);
+	HookEvent("player_team", Event_OnPlayerTeamPre, EventHookMode_Pre);
+	HookEvent("player_team", Event_OnPlayerTeamPost, EventHookMode_Post);
 	HookEvent("player_jump", Event_OnJumpMacroDox, EventHookMode_Post);
-	HookEvent("player_team", EventTeamChange, EventHookMode_Post);
 	HookEntityOutput("func_button", "OnPressed", ButtonPress);
 	
 	//mapcycle array

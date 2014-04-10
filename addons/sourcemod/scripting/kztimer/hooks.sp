@@ -114,7 +114,13 @@ public Action:Event_OnPlayerSpawn(Handle:event, const String:name[], bool:dontBr
 		g_OldAngle[client] = angle[1];	
 	}
 }
-			
+
+public Action:Event_OnPlayerTeamPre(Handle:event, const String:name[], bool:dontBroadcast)
+{
+	SetEventBroadcast(event, true);
+	return Plugin_Continue;
+} 
+
 public Action:Say_Hook(client, args)
 {
 	if (client && IsValidEntity(client) && IsClientInGame(client))
@@ -249,7 +255,7 @@ public Action:Say_Hook(client, args)
 	return Plugin_Continue;
 }
 
-public Action:EventTeamChange(Handle:event, const String:name[], bool:dontBroadcast)
+public Action:Event_OnPlayerTeamPost(Handle:event, const String:name[], bool:dontBroadcast)
 {
 	new client = GetClientOfUserId(GetEventInt(event, "userid"));
 	if (!client || !IsClientInGame(client) || IsFakeClient(client))
@@ -273,6 +279,22 @@ public Action:EventTeamChange(Handle:event, const String:name[], bool:dontBroadc
 		PrintToChat(client, "%t", "HideSpecRadar",MOSSGREEN,WHITE,GREEN,WHITE);
 		g_bPause[client]=false;
 		CreateTimer(0.0, HideRadar, client,TIMER_FLAG_NO_MAPCHANGE);
+	}
+	
+	//team join msg
+	new String:strTeamName[32];
+	if (team==1)
+		Format(strTeamName, 32, "Spectators");
+	else
+		if (team==2)
+			Format(strTeamName, 32, "Terrorist force");	
+		else
+			Format(strTeamName, 32, "Counter-terrorist force");	
+	if (client != 0 && !IsFakeClient(client))
+	{
+		for (new i = 1; i <= MaxClients; i++)
+			if (IsClientConnected(i) && IsClientInGame(i) && i != client)
+				PrintToChat(i,"Player %N joined %s", client,strTeamName);
 	}
 }
 
