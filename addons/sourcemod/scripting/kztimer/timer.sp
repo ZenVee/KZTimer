@@ -730,7 +730,7 @@ public Action:OnShowMenuTimer(Handle:timer, any:client)
 {
 	if (IsClientInGame(client) && !IsFakeClient(client))
 		if (g_bAllowCheckpoints)
-			if(StrEqual(g_szMapTag[0],"kz") || StrEqual(g_szMapTag[0],"xc")  || StrEqual(g_szMapTag[0],"bkz"))
+			if(StrEqual(g_szMapTag[0],"kz") || StrEqual(g_szMapTag[0],"xc") || StrEqual(g_szMapTag[0],"bhop") || StrEqual(g_szMapTag[0],"bkz"))
 				Client_Kzmenu(client,0);
 }
 
