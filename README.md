@@ -34,3 +34,6 @@ v1.13
 v1.14
 - overhauled calculation of player rankings
 - fixed several minor bugs
+
+v1.15
+- climbers menu should pop up on spawn now ;)
