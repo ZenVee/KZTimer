@@ -723,11 +723,15 @@ public Action:OnPlayerConnectTimer(Handle:timer, any:client)
 			PrintHintText(client,"%t", "TimerStartReminder");
 		}
 		g_bRestoreCMsg[client]=false;
-		
+	}
+}
+
+public Action:OnShowMenuTimer(Handle:timer, any:client)
+{
+	if (IsClientInGame(client) && !IsFakeClient(client))
 		if (g_bAllowCheckpoints)
 			if(StrEqual(g_szMapTag[0],"kz") || StrEqual(g_szMapTag[0],"xc")  || StrEqual(g_szMapTag[0],"bkz"))
 				Client_Kzmenu(client,0);
-	}
 }
 
 public Action:RespawnPlayer(Handle:Timer, any:client)

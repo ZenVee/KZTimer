@@ -2067,6 +2067,7 @@ public ShowSrvSettings(client)
 	PrintToConsole(client, "kz_checkpoints %b", g_bAllowCheckpoints);
 	PrintToConsole(client, "kz_clean_weapons %b", g_bCleanWeapons);
 	PrintToConsole(client, "kz_country_tag %b", g_bCountry);
+	PrintToConsole(client, "kz_custom_models %b", g_bPlayerSkinChange);	
 	PrintToConsole(client, "kz_dist_min_lj %.1f", g_dist_good_lj);
 	PrintToConsole(client, "kz_dist_pro_lj %.1f", g_dist_pro_lj);
 	PrintToConsole(client, "kz_dist_leet_lj %.1f", g_dist_leet_lj);
@@ -2089,7 +2090,6 @@ public ShowSrvSettings(client)
 	PrintToConsole(client, "kz_goto %b", g_bGoToServer);
 	PrintToConsole(client, "kz_jumpstats %b", g_bJumpStats);
 	PrintToConsole(client, "kz_noclip %b", g_bNoClipS);
-	PrintToConsole(client, "kz_custom_models %b", g_bPlayerSkinChange);	
 	PrintToConsole(client, "kz_prespeed_cap %.1f (speed-limiter)", g_fBhopSpeedCap);
 	PrintToConsole(client, "kz_max_prespeed_bhop_dropbhop %.1f", g_fMaxBhopPreSpeed);
 	PrintToConsole(client, "kz_noblock %b", g_bNoBlock);
